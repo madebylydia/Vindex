@@ -1,12 +1,10 @@
 import click
 import rich
-
 from rich.prompt import Prompt as Confirm
 
 from vindex.cli.utils import Prompt
 from vindex.core.creator.model import Creator
 from vindex.core.creator.reader import get_creator
-
 
 SETUP_INTRO = f"""
 [bold blue]:star-emoji: Welcome to Vindex setup![/]
@@ -37,19 +35,19 @@ def setup():
 
     console.print("[yellow]:key-emoji: What is your bot's token?")
     token = Prompt.ask()
-    
+
     console.print("[yellow]:speech_balloon-emoji: What is your bot's prefix?")
     prefix = Prompt.ask()
-    
+
     console.print("[yellow]:floppy_disk-emoji: What is your database name?")
     database_name = Prompt.ask()
-    
+
     console.print("[yellow]:floppy_disk-emoji: Who is your database user?")
     database_user = Prompt.ask()
-    
+
     console.print("[yellow]:floppy_disk-emoji: What is your database user's password?")
     database_password = Prompt.ask()
-    
+
     console.print("[yellow]:floppy_disk-emoji: What is your database host?")
     database_host = Prompt.ask()
 
@@ -66,4 +64,6 @@ def setup():
 
     if Confirm.ask("Do you confirm committing this Creator?"):
         config.commit()
-        console.print("[bold green]:white_check_mark-emoji: The Creator has been succesfully committed!")
+        console.print(
+            "[bold green]:white_check_mark-emoji: The Creator has been succesfully committed!"
+        )

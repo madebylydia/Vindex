@@ -1,6 +1,6 @@
 from vindex.core.creator.model import Creator
-
 from vindex.core.exceptions.invalid_creator import CreatorException
+
 
 def get_raw_creator() -> str | None:
     """

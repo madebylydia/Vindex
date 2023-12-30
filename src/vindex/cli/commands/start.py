@@ -1,13 +1,14 @@
-import uvloop
+import asyncio
 import logging
+
 import click
 import rich
+import uvloop
 from rich.logging import RichHandler
 
 from vindex.core.bot import Vindex
 from vindex.core.creator.reader import fetch_creator
 from vindex.core.exceptions.invalid_creator import CreatorException
-
 
 _log = logging.getLogger(__name__)
 
@@ -32,14 +33,18 @@ def start(log_level: int):
     try:
         creator = fetch_creator()
     except CreatorException:
-        console.print("[red]It appears that you have not setup Vindex. Please run [blue]vindex setup[/blue] to setup Vindex first.")
+        console.print(
+            "[red]It appears that you have not setup Vindex. Please run [blue]vindex setup[/blue] to setup Vindex first."
+        )
         exit(1)
 
     async def async_start():
+        vindex = Vindex(creator)
         try:
-            vindex = Vindex(creator)
-            vindex.run(creator.token, log_handler=RichHandler(level=log_level), log_level=log_level)
+            async with vindex as bot:
+                await bot.start(creator.token)
         finally:
+            _log.warning("Bot has disconnected. Disconnecting from database...")
             await vindex.database.disconnect()
 
-    uvloop.run(async_start())
+    asyncio.run(async_start())
