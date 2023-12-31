@@ -10,16 +10,15 @@ from vindex.core.exceptions.invalid_creator import CreatorException
 
 @click.command()
 def updateenv():
-    """
-    Update your .env file with the database URL.
-    """
+    """Update your .env file with the database URL."""
     console = rich.get_console()
 
     try:
         creator = fetch_creator()
     except CreatorException:
         console.print(
-            "[red]It appears that you have not setup Vindex. Please run [blue]vindex setup[/blue] to setup Vindex first."
+            "[red]It appears that you have not setup Vindex. Please run "
+            "[blue]vindex setup[/blue] to setup Vindex first."
         )
         return
 
@@ -35,7 +34,7 @@ def updateenv():
             line[1] = creator.build_db_url()
             edited = True
             break
-        elif line[0] == "":
+        if line[0] == "":
             env_lines_separated.remove(line)
             break
 

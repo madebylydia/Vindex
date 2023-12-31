@@ -1,7 +1,7 @@
 generator client {
   provider             = "prisma-client-py"
-  interface            = "asyncio"
   recursive_type_depth = "5"
+  interface            = "asyncio"
 }
 
 datasource db {
@@ -11,8 +11,26 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @unique @default(autoincrement())
-  name      String   @unique
+  id        BigInt   @id @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  modules   String[]
+}
+
+model Event {
+  id        Int      @id @unique @default(autoincrement())
+  guildId   BigInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  happensAt DateTime
+  guild     Guild    @relation(fields: [guildId], references: [id])
+}
+
+model Guild {
+  id        BigInt   @id @unique
+  locale    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  allowed   Boolean  @default(false)
+  events    Event[]
 }

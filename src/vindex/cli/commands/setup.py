@@ -1,7 +1,8 @@
 import click
 import rich
-from rich.prompt import Prompt as Confirm
+from rich.prompt import Confirm
 
+from vindex.cli.commands.dev.updateenv import updateenv
 from vindex.cli.utils import Prompt
 from vindex.core.creator.model import Creator
 from vindex.core.creator.reader import get_creator
@@ -17,9 +18,7 @@ To abort this setup, press [magenta]Ctrl + C[/magenta] at any moment.
 
 @click.command()
 def setup():
-    """
-    Setup your Vindex instance.
-    """
+    """Setup your Vindex instance."""
     console = rich.get_console()
 
     console.clear()
@@ -28,7 +27,8 @@ def setup():
     if get_creator():
         console.print(
             "[bold red]:warning-emoji: A CREATOR ALREDY EXISTS, IT WILL BE OVERWRITTEN[/]\n"
-            "[red]If you prefer to edit each settings, use the [cyan]vindex edit[/cyan] command.[/red]"
+            "[red]If you prefer to edit each settings, use the [cyan]vindex edit[/cyan] "
+            "command.[/red]"
         )
         if not Confirm.ask("[red]Do you still want to proceed?"):
             return
@@ -67,3 +67,4 @@ def setup():
         console.print(
             "[bold green]:white_check_mark-emoji: The Creator has been succesfully committed!"
         )
+        updateenv()

@@ -8,14 +8,13 @@ from vindex.core.exceptions.invalid_creator import CreatorException
 
 
 def build_list(creator: Creator) -> dict[int, str]:
-    return {index: value for index, value in enumerate(creator.model_dump().keys())}
+    """Create a dictionnary for a list of editable values inside the Creator."""
+    return dict(enumerate(creator.model_dump().keys()))
 
 
 @click.command()
 def edit():
-    """
-    Edit your Vindex Creator.
-    """
+    """Edit your Vindex Creator."""
     console = rich.get_console()
 
     try:
@@ -36,9 +35,7 @@ def edit():
 
         choice = None
         while choice is None:
-            choice = IntPrompt.ask("Enter your choice")
-
-            if choice not in choices.keys():
+            if (choice := IntPrompt.ask("Enter your choice")) not in choices.keys():
                 choice = None
                 console.print("[red]Invalid choice.")
 
@@ -46,7 +43,8 @@ def edit():
         new_value = None
         while not new_value:
             console.print(
-                f"[yellow]:writing_hand-emoji: What is the new value of [blue]{choices[choice]}[/blue]?"
+                "[yellow]:writing_hand-emoji: What is the new value of "
+                f"[blue]{choices[choice]}[/blue]?"
             )
             new_value = Prompt.ask()
 

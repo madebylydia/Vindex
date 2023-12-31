@@ -18,3 +18,13 @@ This will start a new interactive session to request the information about your 
 In case you'd like to edit a value, use `vindex edit`.
 
 Starting your instance is as simple as running `vindex start`.
+
+## Technologies
+
+Vindex is proud of the technologies it uses.
+
+- discord.py
+- PostgreSQL
+- Prisma
+- Click/Rich
+- gettext/Babel

@@ -3,8 +3,7 @@ from vindex.core.exceptions.invalid_creator import CreatorException
 
 
 def get_raw_creator() -> str | None:
-    """
-    Get the raw content from the creator file.
+    """Get the raw content from the creator file.
     May return None if the creator file does not exist.
 
     Returns
@@ -19,8 +18,7 @@ def get_raw_creator() -> str | None:
 
 
 def fetch_raw_creator() -> str:
-    """
-    Fetch the raw content from the creator file.
+    """Fetch the raw content from the creator file.
 
     Returns
     -------
@@ -34,8 +32,7 @@ def fetch_raw_creator() -> str:
 
 
 def get_creator() -> Creator | None:
-    """
-    Get a Creator model.
+    """Get a Creator model.
     May return None if the creator file does not exist.
 
     Raises
@@ -55,8 +52,7 @@ def get_creator() -> Creator | None:
 
 
 def fetch_creator() -> Creator:
-    """
-    Create a Creator model.
+    """Create a Creator model.
 
     Raises
     ------
