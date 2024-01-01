@@ -27,7 +27,7 @@ jobs:
       - name: Generate messages.pot
         run: poetry run poe translate
 
-      - name: Download from Crowdin
+      - name: Upload to Crowdin
         uses: crowdin/github-action@v1
         with:
           upload_sources: true

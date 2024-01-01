@@ -10,7 +10,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Upload to Crowdin
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          cache: 'poetry'
+          python-version: 3.12
+
+      - name: Setup project
+        run: |
+          poetry install --with dev
+          poetry run prisma generate
+
+      - name: Generate messages.pot
+        run: poetry run poe translate
+
+      - name: Download from Crowdin
         uses: crowdin/github-action@v1
         with:
           upload_sources: false
