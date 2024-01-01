@@ -40,4 +40,4 @@ jobs:
 
         env:
           CROWDIN_PROJECT_ID: ${{ vars.CROWDIN_PROJECT_ID }}
-          CROWDIN_PROJECT_KEY: ${{ secrets.CROWDIN_API_KEY }}
+          CROWDIN_API_TOKEN: ${{ secrets.CROWDIN_API_KEY }}
