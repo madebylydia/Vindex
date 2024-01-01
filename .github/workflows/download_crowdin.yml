@@ -15,11 +15,9 @@ jobs:
         with:
           upload_sources: false
           upload_translations: false
-          upload_language: false
 
           download_translations: true
           download_sources: false
-          download_language: false
 
           pull_request_assignees: ${{ github.actor }}
           pull_request_title: 'chore(i18n): Update translations files'
