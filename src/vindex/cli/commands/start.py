@@ -24,7 +24,7 @@ def start(log_level: int):
         level=log_level,
     )
     for logger in ("discord", "prisma", "httpcore", "httpx"):
-        logging.getLogger(logger).setLevel(logging.DEBUG if log_level < 0 else logging.WARNING)
+        logging.getLogger(logger).setLevel(logging.DEBUG if log_level <= 0 else logging.WARNING)
 
     console = rich.get_console()
 

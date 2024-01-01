@@ -4,8 +4,6 @@ import typing
 from vindex.core.services.proto import Service
 
 if typing.TYPE_CHECKING:
-    import discord
-
     from vindex.core.bot import Vindex
 
 
@@ -21,50 +19,50 @@ class AuthorizationService(Service):
         self.bot = bot
         super().__init__()
 
-    async def allow(self, guild: "discord.Guild"):
+    async def allow(self, guild_id: int):
         """Allow a guild to use the bot."""
-        if guild.id in self._cache:
-            if self._cache[guild.id]:
+        if guild_id in self._cache:
+            if self._cache[guild_id]:
                 return
         await self.bot.database.guild.upsert(
-            where={"id": guild.id},
+            where={"id": guild_id},
             data={
                 "create": {
-                    "id": guild.id,
-                    "locale": guild.preferred_locale.value,
+                    "id": guild_id,
+                    "locale": "en-US",
                     "allowed": True,
                 },
                 "update": {"allowed": True},
             },
         )
-        self._cache[guild.id] = True
+        self._cache[guild_id] = True
 
-    async def disallow(self, guild: "discord.Guild"):
+    async def disallow(self, guild_id: int):
         """Unallow a guild to use the bot."""
-        if guild.id in self._cache:
-            if not self._cache[guild.id]:
+        if guild_id in self._cache:
+            if not self._cache[guild_id]:
                 return
         await self.bot.database.guild.upsert(
-            where={"id": guild.id},
+            where={"id": guild_id},
             data={
                 "create": {
-                    "id": guild.id,
-                    "locale": guild.preferred_locale.value,
+                    "id": guild_id,
+                    "locale": "en-US",
                     "allowed": False,
                 },
                 "update": {"allowed": False},
             },
         )
-        self._cache[guild.id] = False
+        self._cache[guild_id] = False
 
-    async def is_allowed(self, guild: "discord.Guild") -> bool:
+    async def is_allowed(self, guild_id: int) -> bool:
         """Check if a guild is allowed to use the bot."""
-        guild_data = await self.bot.database.guild.find_unique(where={"id": guild.id})
+        guild_data = await self.bot.database.guild.find_unique(where={"id": guild_id})
         if not guild_data:
             return False
-        if guild.id not in self._cache:
-            self._cache[guild.id] = guild_data.allowed
-        return self._cache[guild.id]
+        if guild_id not in self._cache:
+            self._cache[guild_id] = guild_data.allowed
+        return self._cache[guild_id]
 
     async def setup(self) -> None:
         """Setup the autorization service."""

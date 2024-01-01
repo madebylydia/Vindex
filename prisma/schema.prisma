@@ -10,20 +10,27 @@ datasource db {
   relationMode = "foreignKeys"
 }
 
+model Core {
+  id   Int      @id @unique
+  cogs String[]
+}
+
 model User {
-  id        BigInt   @id @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  modules   String[]
+  id             BigInt   @id @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  modules        String[]
+  participatesTo Event[]
 }
 
 model Event {
-  id        Int      @id @unique @default(autoincrement())
-  guildId   BigInt
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  happensAt DateTime
-  guild     Guild    @relation(fields: [guildId], references: [id])
+  id           Int      @id @unique @default(autoincrement())
+  guildId      BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  happensAt    DateTime
+  guild        Guild    @relation(fields: [guildId], references: [id])
+  participants User[]
 }
 
 model Guild {

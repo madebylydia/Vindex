@@ -38,6 +38,7 @@ _isort = "isort src/"
 _prisma_format = "prisma format"
 format = ["_black", "_isort", "_prisma_format"]
 lint = "pylint src --rcfile=.pylintrc --output-format=colorized"
+translate = "vindex dev localegenerate"
 
 [tool.black]
 line-length = 99

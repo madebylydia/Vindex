@@ -53,9 +53,8 @@ class Dev(commands.Cog):
         ]
 
         if orphan_guilds:
-            await ctx.send(
-                f"{len(orphan_guilds)} orphan guilds found:\n"
-                "\n".join(f"{guild.id} - {guild.name}" for guild in orphan_guilds)
-            )
+            message = _(f"{len(orphan_guilds)} orphan guilds found:\n")
+            message += "\n".join(f"{guild.id} - {guild.name}" for guild in orphan_guilds)
+            await ctx.send(message)
         else:
             await ctx.send("No orphan guild found. Good.")
