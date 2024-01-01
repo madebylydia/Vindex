@@ -19,8 +19,10 @@ jobs:
           cache: 'poetry'
           python-version: 3.12
 
-      - name: Install package
-        run: poetry install --with dev
+      - name: Setup project
+        run: |
+          poetry install --with dev
+          poetry run prisma generate
 
       - name: Generate messages.pot
         run: poetry run poe translate
