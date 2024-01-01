@@ -3,6 +3,10 @@ name: Download from Crowdin
 on:
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+  contents: write
+
 jobs:
   download:
     runs-on: ubuntu-latest
