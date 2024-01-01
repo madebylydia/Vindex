@@ -1,6 +1,4 @@
-from logging import root
 import pathlib
-from re import sub
 import subprocess
 
 import click
@@ -28,16 +26,21 @@ def localegenerate():
                 continue
 
             if any(file.endswith(".py") for file in files):
-                console.print(f"[green]Generating at [cyan]{root_path}[/cyan]...")
+                locale_path = root_path / "locales"
 
-                subprocess.Popen(
+                if not locale_path.exists():
+                    locale_path.mkdir()
+
+                console.print(f"[green]Generating at [cyan]{root_path}[/cyan]...")
+                with subprocess.Popen(
                     [
                         "pygettext3",
                         "--docstrings",
                         "--output-dir",
-                        root_path / "locales",
+                        str(locale_path),
                         "--style",
                         "GNU",
-                        "--verbose"
-                    ]
-                )
+                        f"{root_path}/*.py",
+                    ],
+                ) as process:
+                    process.wait()

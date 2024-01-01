@@ -33,10 +33,12 @@ class ServerSettings(commands.Cog):
         """Get or set the locale for the server."""
         if locale is None:
             locale = await self.bot.services.i18n.get_guild_locale(ctx.guild.id)
-            await ctx.send(_(f"The locale for this server is {inline(locale)}."))
+            await ctx.send(
+                _("The locale for this server is {locale}.").format(locale=inline(locale))
+            )
             return
         await self.bot.services.i18n.set_guild_locale(ctx.guild.id, locale)
-        await ctx.send(_(f"Locale set to {inline(locale)}."))
+        await ctx.send(_("Locale set to {locale}.").format(locale=inline(locale)))
 
 
 async def setup(bot: "Vindex"):

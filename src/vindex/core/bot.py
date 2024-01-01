@@ -96,8 +96,12 @@ class Vindex(commands.AutoShardedBot):
     ) -> Context:
         return await super().get_context(origin, cls=cls)
 
-    async def on_command_error(
-        self, context: Context, exception: commands.errors.CommandError, /
+    async def on_command_error(  # pyright: ignore[reportIncompatibleMethodOverride]
+        # Weirdest issue I ever had
+        self,
+        context: Context,
+        exception: commands.errors.CommandError,
+        /,
     ) -> None:
         _log.exception("An error occured while executing a command.", exc_info=exception)
 

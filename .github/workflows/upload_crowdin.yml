@@ -1,0 +1,41 @@
+name: Upload to Crowdin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    environment: Crowdin
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          cache: 'poetry'
+          python-version: 3.12
+
+      - name: Install package
+        run: poetry install --with dev
+
+      - name: Generate messages.pot
+        run: poetry run poe translate
+
+      - name: Upload to Crowdin
+        uses: crowdin/github-action@v1
+        with:
+          upload_sources: true
+          upload_translations: false
+          upload_language: false
+
+          download_sources: false
+          download_translations: false
+          download_language: false
+
+        env:
+          CROWDIN_PROJECT_ID: ${{ vars.CROWDIN_PROJECT_ID }}
+          CROWDIN_PROJECT_KEY: ${{ secrets.CROWDIN_API_KEY }}
