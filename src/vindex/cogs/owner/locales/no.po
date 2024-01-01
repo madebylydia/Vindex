@@ -1,0 +1,40 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: vindex\n"
+"POT-Creation-Date: 2024-01-01 05:13+0000\n"
+"PO-Revision-Date: 2024-01-01 05:35\n"
+"Last-Translator: \n"
+"Language-Team: Norwegian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: vindex\n"
+"X-Crowdin-Project-ID: 637062\n"
+"X-Crowdin-Language: no\n"
+"X-Crowdin-File: /src/vindex/cogs/owner/locales/messages.pot\n"
+"X-Crowdin-File-ID: 64\n"
+"Language: no_NO\n"
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:11
+#, docstring
+msgid "Owner related commands."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:20
+#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:26
+#, docstring
+msgid "Allow a guild to use the bot."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:32
+#, docstring
+msgid "Disallow a guild to use the bot."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:38
+#, docstring
+msgid "Check if a guild is allowed to use the bot."
+msgstr ""
+

@@ -1,0 +1,104 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: vindex\n"
+"POT-Creation-Date: 2024-01-01 05:13+0000\n"
+"PO-Revision-Date: 2024-01-01 05:35\n"
+"Last-Translator: \n"
+"Language-Team: Chinese Simplified\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Crowdin-Project: vindex\n"
+"X-Crowdin-Project-ID: 637062\n"
+"X-Crowdin-Language: zh-CN\n"
+"X-Crowdin-File: /src/vindex/core/locales/messages.pot\n"
+"X-Crowdin-File-ID: 34\n"
+"Language: zh_CN\n"
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:50
+#, docstring
+msgid "Vindex: Discord Bot made for DCS communities\n\n"
+"    This class is the main bot class, the \"core\" itself;\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:16
+#, docstring
+msgid "Vindex's implementation of :py:class:`discord.ext.commands.Context`.\n\n"
+"    Implements all methods of :py:class:`discord.ext.commands.Context` and adds\n"
+"    some extra properties and methods.\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:24
+#, docstring
+msgid "Return the database instance connected to the bot."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:28
+#, docstring
+msgid "Add a tick reaction to the message.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        to_message : Optional, :py:class:`discord.Message`\n"
+"            The message to react to.\n"
+"            If none, the context's message will be reacted to.\n\n"
+"        Returns\n"
+"        -------\n"
+"        :py:class:`bool`\n"
+"            Whether the reaction was successful.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:46
+#, docstring
+msgid "Attempt to react to the context message.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        emoji : :py:class:`discord.message.EmojiInputType`\n"
+"            The emoji to react with.\n"
+"        to_message : Optional, :py:class:`discord.Message`\n"
+"            The message to react to.\n"
+"            If none, the context's message will be reacted to.\n\n"
+"        Returns\n"
+"        -------\n"
+"        :py:class:`bool`\n"
+"            Whether the reaction was successful.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:70
+#, docstring
+msgid "Vindex's implementation of :py:class:`discord.ext.commands.Cog`.\n\n"
+"    Implements all methods of :py:class:`discord.ext.commands.Cog` and adds\n"
+"    some extra properties and methods.\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:80
+#, docstring
+msgid "Context used for commands ran in a guild. Same as Context."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:101
+#, docstring
+msgid "Context used for commands ran in private messages. Same as Context."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:18
+#, docstring
+msgid "A list of langugages available to the bot."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:30
+#, docstring
+msgid "Set the language to use from a guild."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:40
+#, docstring
+msgid "Utility class used to translate strings."
+msgstr ""
+

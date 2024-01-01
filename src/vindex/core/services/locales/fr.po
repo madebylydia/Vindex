@@ -1,0 +1,93 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: vindex\n"
+"POT-Creation-Date: 2024-01-01 05:13+0000\n"
+"PO-Revision-Date: 2024-01-01 05:35\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Crowdin-Project: vindex\n"
+"X-Crowdin-Project-ID: 637062\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: /src/vindex/core/services/locales/messages.pot\n"
+"X-Crowdin-File-ID: 40\n"
+"Language: fr_FR\n"
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:14
+#, docstring
+msgid "The Autorization service is used to allow certains guilds to use the bot."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:23
+#, docstring
+msgid "Allow a guild to use the bot."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:41
+#, docstring
+msgid "Unallow a guild to use the bot."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:59
+#, docstring
+msgid "Check if a guild is allowed to use the bot."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:68
+#, docstring
+msgid "Setup the autorization service."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:14
+#, docstring
+msgid "Utility class used to translate strings."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:23
+#, docstring
+msgid "Set the locale for a guild."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:40
+#, docstring
+msgid "Get the locale for a guild."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:51
+#, docstring
+msgid "Setup the i18n service."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:8
+#, docstring
+msgid "Base class for all services."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:14
+#, docstring
+msgid "Setup the service."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:11
+#, docstring
+msgid "The service provider give access to all the services used by the bots.\n"
+"    Also helps prepare and setup services.\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:26
+#, docstring
+msgid "Prepare the services.\n\n"
+"        This method should probably be ran as a task rather than a coroutine.\n"
+"        "
+msgstr ""
+
