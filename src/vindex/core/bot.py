@@ -12,7 +12,7 @@ from rich.table import Table
 
 from prisma import Prisma
 from vindex import __version__ as vindex_version
-from vindex.core import extensions
+from vindex.core.core_types import Context
 from vindex.core.i18n import set_language_from_guild
 from vindex.core.services.provider import ServiceProvider
 
@@ -40,19 +40,24 @@ VINDEX_HEADER = """[blue]
             ,;.             fE E#t
                              , L:
 """
-COGS = ("dev",)
+COGS = (
+    "dev",
+    "owner",
+)
 
 
-class Vindex(extensions.Events):
+class Vindex(commands.AutoShardedBot):
     """Vindex: Discord Bot made for DCS communities
 
     This class is the main bot class, the "core" itself;
     """
 
+    uptime: datetime
+
     def __init__(self, creator: "Creator") -> None:
         self.creator = creator
         self.database = Prisma(datasource={"url": self.creator.build_db_url()})
-        super(commands.AutoShardedBot, self).__init__(
+        super().__init__(
             creator.prefix,
             description="Vindex - A DCS helper",
             intents=discord.Intents.all(),
@@ -86,6 +91,28 @@ class Vindex(extensions.Events):
         _log.info("Done setting up Vindex.")
         await super().setup_hook()
 
+    async def get_context(
+        self, origin: discord.Message | discord.Interaction, /, *, cls: type = Context
+    ) -> Context:
+        return await super().get_context(origin, cls=cls)
+
+    async def on_command_error(
+        self, context: Context, exception: commands.errors.CommandError, /
+    ) -> None:
+        _log.exception("An error occured while executing a command.", exc_info=exception)
+
+        if context.command and context.command.has_error_handler():
+            return
+        if context.cog and context.cog.has_error_handler():
+            return
+
+        if isinstance(exception, commands.errors.CommandNotFound):
+            await context.send("Could not find such command.")
+            return
+        if isinstance(exception, commands.errors.MissingRequiredArgument):
+            await context.send_help(context.command)
+            return
+
     async def on_guild_join(self, guild: discord.Guild):
         await self.database.guild.create(
             {
@@ -96,6 +123,8 @@ class Vindex(extensions.Events):
         )
 
     async def on_ready(self) -> None:
+        self.uptime = datetime.utcnow()
+
         console = rich.get_console()
         console.print(VINDEX_HEADER)
 

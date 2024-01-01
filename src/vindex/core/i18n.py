@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 import enum
 import gettext
 import logging
 import pathlib
+from re import L
 import typing
 from contextvars import ContextVar
 
@@ -17,12 +19,13 @@ _corrent_language = ContextVar("current_language", default="en_US")
 class Languages(enum.Enum):
     """A list of langugages available to the bot."""
 
-    ENGLISH = "en_US"
-    FRENCH = "fr_FR"
-    GERMAN = "de_DE"
-    RUSSIAN = "ru_RU"
-    SPANISH = "es_ES"
-    ITALIAN = "it_IT"
+    AFRIKAANS = "af"
+    ENGLISH = "en"
+    FRENCH = "fr"
+    GERMAN = "de"
+    RUSSIAN = "ru"
+    SPANISH = "es"
+    ITALIAN = "it"
 
 
 async def set_language_from_guild(bot: "Vindex", guild_id: int | None = None) -> None:
