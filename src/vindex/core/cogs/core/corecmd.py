@@ -22,15 +22,14 @@ class Core(commands.Cog):
         self.bot = bot
         super().__init__()
 
-    @commands.group()
-    @commands.guild_only()
     @commands.is_owner()
-    async def set(self, ctx: GuildContext):
+    @commands.guild_only()
+    @commands.group("set")
+    async def cmd_set(self, ctx: GuildContext):
         """Set server settings."""
 
-    @commands.guild_only()
-    @set.command()
-    async def locale(self, ctx: GuildContext, locale: Languages | None = None):
+    @cmd_set.command("locale")
+    async def cmd_set_locale(self, ctx: GuildContext, locale: Languages | None = None):
         """Get or set the locale for the server."""
         if locale is None:
             guild_locale = await self.bot.services.i18n.get_guild_locale(ctx.guild.id)
@@ -40,13 +39,12 @@ class Core(commands.Cog):
                 )
             )
             return
-        # TODO: need to check if the language is supported
         await self.bot.services.i18n.set_guild_locale(ctx.guild.id, locale)
         await ctx.send(_("Locale set to {locale}.").format(locale=inline(locale.value)))
 
     @commands.is_owner()
-    @commands.command()
-    async def invite(self, ctx: Context):
+    @commands.command("invite")
+    async def cmd_invite(self, ctx: Context):
         """Return an invitation code where to invite the bot."""
         assert self.bot.user is not None
         invite_permissions_code = (

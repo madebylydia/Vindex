@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: vindex\n"
-"POT-Creation-Date: 2024-01-01 05:13+0000\n"
-"PO-Revision-Date: 2024-01-01 05:35\n"
+"POT-Creation-Date: 2024-01-03 04:29+0000\n"
+"PO-Revision-Date: 2024-01-03 04:34\n"
 "Last-Translator: \n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -13,28 +13,93 @@ msgstr ""
 "X-Crowdin-Project: vindex\n"
 "X-Crowdin-Project-ID: 637062\n"
 "X-Crowdin-Language: ru\n"
-"X-Crowdin-File: /src/vindex/cogs/owner/locales/messages.pot\n"
-"X-Crowdin-File-ID: 64\n"
+"X-Crowdin-File: /src/vindex/core/cogs/owner/locales/messages.pot\n"
+"X-Crowdin-File-ID: 78\n"
 "Language: ru_RU\n"
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:11
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:18
 #, docstring
-msgid "Owner related commands."
+msgid "Commands reserved for the owner.\n"
+"    Used for bot's administration & management.\n"
+"    "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:20
-#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:26
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:29
+#, docstring
+msgid "Commands reserved for the owner.\n"
+"        Used for bot's administration & management.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:37
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:43
 #, docstring
 msgid "Allow a guild to use the bot."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:32
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:45
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:58
+msgid "This guild has been authorized."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:49
 #, docstring
 msgid "Disallow a guild to use the bot."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/cogs/owner/core.py:38
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:51
+msgid "This guild has been unauthorized."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:55
 #, docstring
 msgid "Check if a guild is allowed to use the bot."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:60
+msgid "This guid has not been authorized."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:65
+#, docstring
+msgid "Set the channel where the bot will send import notification to."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:67
+msgid "The channel has been set to {channel}."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:71
+#, docstring
+msgid "Load a cog."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:74
+msgid "{cog} has been loaded."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:77
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:87
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:97
+msgid "An error occured:\n"
+"{error}"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:81
+#, docstring
+msgid "Reload a cog."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:84
+msgid "{cog} has been reloaded."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:91
+#, docstring
+msgid "Unoad a cog."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/owner/core.py:94
+msgid "{cog} has been unloaded."
 msgstr ""
 

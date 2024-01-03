@@ -44,6 +44,13 @@ t           E#t ..         G#E E##D.               tt i       tDj
 _ = Translator("Vindex", __file__)
 
 
+class VindexHelp(commands.MinimalHelpCommand):
+    """Custom help class handler for Vindex. WIP"""
+
+    def __init__(self) -> None:
+        super().__init__(show_hidden=False, verify_checks=True)
+
+
 class Vindex(commands.AutoShardedBot):
     """Vindex: Discord Bot made for DCS communities
 
@@ -61,7 +68,7 @@ class Vindex(commands.AutoShardedBot):
             intents=discord.Intents.all(),
         )
         self.services = ServiceProvider(self)
-        self.help_command = commands.MinimalHelpCommand(sort_commands=True)
+        self.help_command = VindexHelp()
 
     @property
     def owner_name(self) -> str | None:
@@ -79,17 +86,13 @@ class Vindex(commands.AutoShardedBot):
             return self.application.team.name
         return self.application.owner.name
 
-    async def core_notify(
-        self, content: str | None = None, **kwargs: typing.Unpack[SendMethodDict]
-    ) -> discord.Message | None:
+    async def core_notify(self, **kwargs: typing.Unpack[SendMethodDict]) -> discord.Message | None:
         """Send a message to the core notification channel.
         This should be used to send messages that the owner must be aware of. For example, join of
         a new guild (Since bot works on an authorization system).
 
         Parameters
         ----------
-        content: str
-            The content of the message to send.
         **kwargs: The
             Same argument as :py:meth:`discord.abc.Messageable.send`. Typed.
 
@@ -106,7 +109,7 @@ class Vindex(commands.AutoShardedBot):
             )
             return None
         assert isinstance(channel, discord.TextChannel)
-        return await channel.send(content, **kwargs)
+        return await channel.send(**kwargs)
 
     async def setup_hook(self) -> None:
         # Database stuff

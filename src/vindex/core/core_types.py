@@ -17,6 +17,7 @@ if typing.TYPE_CHECKING:
 class SendMethodDict(typing.TypedDict):
     """Typed dict for reusability of the "send" method if required."""
 
+    content: typing.NotRequired[str]
     embeds: typing.NotRequired[collections.abc.Sequence[discord.Embed]]
     files: typing.NotRequired[collections.abc.Sequence[discord.File]]
     stickers: typing.NotRequired[

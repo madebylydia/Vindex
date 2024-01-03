@@ -23,7 +23,7 @@ class Dev(commands.Cog):
     @commands.command()
     async def ping(self, ctx: Context):
         """Ping! Pong! Have some fun!"""
-        await ctx.send(_("Pong!"))
+        await ctx.send("Pong!")
 
     @commands.is_owner()
     @commands.group("dev", aliases=["d"])
@@ -53,8 +53,10 @@ class Dev(commands.Cog):
         ]
 
         if orphan_guilds:
-            message = _(f"{len(orphan_guilds)} orphan guilds found:\n")
+            message = _("{orphan_guilds} orphan guilds found:\n").format(
+                orphan_guilds=len(orphan_guilds)
+            )
             message += "\n".join(f"{guild.id} - {guild.name}" for guild in orphan_guilds)
             await ctx.send(message)
         else:
-            await ctx.send("No orphan guild found. Good.")
+            await ctx.send(_("No orphan guild found. Good."))

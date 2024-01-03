@@ -1,0 +1,47 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: vindex\n"
+"POT-Creation-Date: 2024-01-03 04:29+0000\n"
+"PO-Revision-Date: 2024-01-03 04:34\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: vindex\n"
+"X-Crowdin-Project-ID: 637062\n"
+"X-Crowdin-Language: en\n"
+"X-Crowdin-File: /src/vindex/core/cogs/core/locales/messages.pot\n"
+"X-Crowdin-File-ID: 72\n"
+"Language: en_US\n"
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:17
+#, docstring
+msgid "Server settings related module."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:29
+#, docstring
+msgid "Set server settings."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:34
+#, docstring
+msgid "Get or set the locale for the server."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:38
+msgid "The locale for this server is {locale}."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:45
+msgid "Locale set to {locale}."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/cogs/core/corecmd.py:50
+#, docstring
+msgid "Return an invitation code where to invite the bot."
+msgstr ""
+

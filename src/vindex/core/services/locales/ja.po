@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: vindex\n"
-"POT-Creation-Date: 2024-01-01 05:13+0000\n"
-"PO-Revision-Date: 2024-01-01 05:35\n"
+"POT-Creation-Date: 2024-01-03 04:29+0000\n"
+"PO-Revision-Date: 2024-01-03 04:34\n"
 "Last-Translator: \n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -18,73 +18,218 @@ msgstr ""
 "Language: ja_JP\n"
 
 #:
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:14
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:19
+#, docstring
+msgid "The colors used for the embeds."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:29
 #, docstring
 msgid "The Autorization service is used to allow certains guilds to use the bot."
 msgstr ""
 
 #:
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:23
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:46
+msgid "This guild is allowed to use the bot. It'll now stay."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:49
+msgid "This guild is not allowed to use the bot. It'll now leave."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:58
+msgid "Owner information"
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:59
+msgid "**Name:** {name}\n"
+"**ID:** {id}\n"
+"**Created at:** {created_at}\n"
+"**Known in:**\n"
+"{known_in}\n"
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:74
+msgid "Members count"
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:75
+msgid "{member_count} members.\n"
+"{humans} humans.\n"
+"{bots} bots.\n"
+"Ratio: {percentage}% bots."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:97
 #, docstring
 msgid "Allow a guild to use the bot."
 msgstr ""
 
 #:
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:41
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:115
 #, docstring
 msgid "Unallow a guild to use the bot."
 msgstr ""
 
 #:
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:59
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:133
 #, docstring
 msgid "Check if a guild is allowed to use the bot."
 msgstr ""
 
 #:
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:68
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:142
+#, docstring
+msgid "Handles the join of a new guild.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        guild : discord.Guild\n"
+"            The guild that joined.\n"
+"        "
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:158
+msgid "Guild %s (%s) is allowed to use the bot."
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:161
+msgid "Guild %s (%s) is unallowed to use the bot, leaving"
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/authorization.py:165
 #, docstring
 msgid "Setup the autorization service."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:14
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:10
+#, docstring
+msgid "A typed dict used for the :py:meth:`CogsManager.compare` method."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:17
+#, docstring
+msgid "The Cogs manager service will help load and unload cogs from the bot.\n"
+"    Needed as it interacts with the database too.\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:30
+#, docstring
+msgid "Return the loaded cogs list."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:34
+#, docstring
+msgid "Load a cog using its module name.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        cog : str\n"
+"            The name of the cog to load.\n\n"
+"        Raises\n"
+"        ------\n"
+"        ExtensionNotFound\n"
+"            The extension could not be imported. This is also raised if the name of the extension\n"
+"            could not be resolved using the provided package parameter.\n"
+"        ExtensionAlreadyLoaded\n"
+"            The extension is already loaded.\n"
+"        NoEntryPointError\n"
+"            The extension does not have a setup function.\n"
+"        ExtensionFailed\n"
+"            The extension or its setup function had an execution error.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:58
+#, docstring
+msgid "Reload a cog using its module name.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        cog : str\n"
+"            The name of the cog to reload.\n\n"
+"        Raises\n"
+"        ------\n"
+"        ExtensionNotLoaded\n"
+"            The extension was not loaded.\n"
+"        ExtensionNotFound\n"
+"            The extension could not be imported. This is also raised if the name of the extension\n"
+"            could not be resolved using the provided package parameter.\n"
+"        NoEntryPointError\n"
+"            The extension does not have a setup function.\n"
+"        ExtensionFailed\n"
+"            The extension setup function had an execution error.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:81
+#, docstring
+msgid "Unload a cog using its module name.\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        cog : str\n"
+"            The name of the cog to unload.\n\n"
+"        Raises\n"
+"        ------\n"
+"        ExtensionNotFound\n"
+"            The name of the extension could not be resolved using the provided package parameter.\n"
+"        ExtensionNotLoaded\n"
+"            The extension was not loaded.\n"
+"        "
+msgstr ""
+
+#:
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/cogs_manager.py:100
+#, docstring
+msgid "Compare the cogs list inside the database with the loaded cogs."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:15
 #, docstring
 msgid "Utility class used to translate strings."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:23
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:24
 #, docstring
 msgid "Set the locale for a guild."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:40
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:41
 #, docstring
 msgid "Get the locale for a guild."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:51
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/i18n.py:52
 #, docstring
 msgid "Setup the i18n service."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:8
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:9
 #, docstring
 msgid "Base class for all services."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:14
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/proto.py:16
 #, docstring
 msgid "Setup the service."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:11
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:12
 #, docstring
 msgid "The service provider give access to all the services used by the bots.\n"
 "    Also helps prepare and setup services.\n"
 "    "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:26
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/services/provider.py:31
 #, docstring
 msgid "Prepare the services.\n\n"
 "        This method should probably be ran as a task rather than a coroutine.\n"

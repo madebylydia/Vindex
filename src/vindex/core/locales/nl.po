@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: vindex\n"
-"POT-Creation-Date: 2024-01-01 05:13+0000\n"
-"PO-Revision-Date: 2024-01-01 05:35\n"
+"POT-Creation-Date: 2024-01-03 04:29+0000\n"
+"PO-Revision-Date: 2024-01-03 04:34\n"
 "Last-Translator: \n"
 "Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
@@ -17,14 +17,93 @@ msgstr ""
 "X-Crowdin-File-ID: 34\n"
 "Language: nl_NL\n"
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:50
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:48
 #, docstring
 msgid "Vindex: Discord Bot made for DCS communities\n\n"
 "    This class is the main bot class, the \"core\" itself;\n"
 "    "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:16
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:68
+#, docstring
+msgid "Attempt to return the name of the owner of the instance.\n\n"
+"        Returns\n"
+"        -------\n"
+"        str or None\n"
+"            The name of the owner of the instance.\n"
+"            None if the application is not set yet. (Wait for bot to connect)\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:85
+#, docstring
+msgid "Send a message to the core notification channel.\n"
+"        This should be used to send messages that the owner must be aware of. For example, join of\n"
+"        a new guild (Since bot works on an authorization system).\n\n"
+"        Parameters\n"
+"        ----------\n"
+"        content: str\n"
+"            The content of the message to send.\n"
+"        **kwargs: The\n"
+"            Same argument as :py:meth:`discord.abc.Messageable.send`. Typed.\n\n"
+"        Returns\n"
+"        -------\n"
+"        discord.Message or None\n"
+"            The message sent. None if no channel were set.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:158
+msgid "I require the `Embed Links` to work properly.\n"
+"Ask an administrator to give me the necessary permissions."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:183
+msgid "Could not find such command."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:202
+msgid "Vindex is connecting and setting up..."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:213
+msgid "[cyan]Connected as [green]{me}[/green]. Owned by [green]{owner}[/green].[/]"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:219
+msgid "Prefix"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:220
+msgid "Version"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:221
+msgid "d.py version"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:225
+msgid "Guilds"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:226
+msgid "Users"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:227
+msgid "Shards"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/bot.py:234
+msgid "Flying the F-14B Tomcat"
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:18
+#, docstring
+msgid "Typed dict for reusability of the \"send\" method if required."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:38
 #, docstring
 msgid "Vindex's implementation of :py:class:`discord.ext.commands.Context`.\n\n"
 "    Implements all methods of :py:class:`discord.ext.commands.Context` and adds\n"
@@ -32,12 +111,12 @@ msgid "Vindex's implementation of :py:class:`discord.ext.commands.Context`.\n\n"
 "    "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:24
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:46
 #, docstring
 msgid "Return the database instance connected to the bot."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:28
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:50
 #, docstring
 msgid "Add a tick reaction to the message.\n\n"
 "        Parameters\n"
@@ -52,7 +131,7 @@ msgid "Add a tick reaction to the message.\n\n"
 "        "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:46
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:68
 #, docstring
 msgid "Attempt to react to the context message.\n\n"
 "        Parameters\n"
@@ -69,36 +148,54 @@ msgid "Attempt to react to the context message.\n\n"
 "        "
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:70
-#, docstring
-msgid "Vindex's implementation of :py:class:`discord.ext.commands.Cog`.\n\n"
-"    Implements all methods of :py:class:`discord.ext.commands.Cog` and adds\n"
-"    some extra properties and methods.\n"
-"    "
-msgstr ""
-
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:80
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:94
 #, docstring
 msgid "Context used for commands ran in a guild. Same as Context."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:101
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/core_types.py:115
 #, docstring
 msgid "Context used for commands ran in private messages. Same as Context."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:18
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:23
 #, docstring
 msgid "A list of langugages available to the bot."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:30
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:41
+#, docstring
+msgid "Returns an instance of the Languages class from a string.\n"
+"        This is meant to be used as a converter for commands.\n"
+"        "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:53
 #, docstring
 msgid "Set the language to use from a guild."
 msgstr ""
 
-#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:40
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:62
+#, docstring
+msgid "Return the path to the locales folder.\n\n"
+"    Parameters\n"
+"    ----------\n"
+"    path : pathlib.Path\n"
+"        The path to the module's directory.\n\n"
+"    Returns\n"
+"    -------\n"
+"    pathlib.Path\n"
+"        The path to the locales folder.\n"
+"    "
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:78
 #, docstring
 msgid "Utility class used to translate strings."
+msgstr ""
+
+#: /home/runner/work/Vindex/Vindex/src/vindex/core/i18n.py:105
+#, docstring
+msgid "Load the translations from a module."
 msgstr ""
 

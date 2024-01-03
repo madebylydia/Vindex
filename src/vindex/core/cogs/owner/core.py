@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from vindex.core.i18n import Translator
 from vindex.core.ui.formatting import block, inline
+from vindex.core.ui.prompt import ConfirmView
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
@@ -60,13 +61,28 @@ class Owner(commands.Cog):
             else _("This guid has not been authorized.")
         )
 
-    @cmd_owner_authorization.command(name="setchannel")
-    async def cmd_owner_setchannel(self, ctx: "Context", channel: discord.TextChannel):
+    @cmd_owner.command(name="notifychannel")
+    async def cmd_owner_setchannel(
+        self, ctx: "Context", channel: discord.TextChannel | None = None
+    ):
         """Set the channel where the bot will send import notification to."""
+        if channel is None:
+            core = await ctx.db.core.find_unique_or_raise(where={"id": 1})
+            if core.notifyChannel is None:
+                await ctx.send(_("No notification channel have been set yet."))
+                return
+
+            set_channel = self.bot.get_channel(core.notifyChannel)
+            assert isinstance(set_channel, discord.TextChannel)
+            await ctx.send(
+                _("The current channel is {channel}.").format(channel=set_channel.mention)
+            )
+            return
+
         await ctx.db.core.update(where={"id": 1}, data={"notifyChannel": channel.id})
         await ctx.send(_("The channel has been set to {channel}.").format(channel=channel.mention))
 
-    @cmd_owner.command(name="load")
+    @commands.command(name="load")
     async def cmd_owner_load(self, ctx: "Context", cog: str):
         """Load a cog."""
         try:
@@ -76,7 +92,7 @@ class Owner(commands.Cog):
             exception_block = block(str(exception), "py")
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
-    @cmd_owner.command(name="reload")
+    @commands.command(name="reload")
     async def cmd_owner_reload(self, ctx: "Context", cog: str):
         """Reload a cog."""
         try:
@@ -86,7 +102,7 @@ class Owner(commands.Cog):
             exception_block = block(str(exception), "py")
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
-    @cmd_owner.command(name="unload")
+    @commands.command(name="unload")
     async def cmd_owner_unload(self, ctx: "Context", cog: str):
         """Unoad a cog."""
         try:
@@ -95,3 +111,26 @@ class Owner(commands.Cog):
         except Exception as exception:
             exception_block = block(str(exception), "py")
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
+
+    @cmd_owner.command(name="sync")
+    async def cmd_owner_sync(self, ctx: "Context", guild: discord.Guild | None = None):
+        """Sync the database."""
+        if guild is None:
+            view = ConfirmView(
+                ctx, content=_("Are you sure you want to synchronise the whole tree globally?")
+            )
+            async with view as confirmed:
+                if confirmed is None:
+                    return
+                if confirmed is False:
+                    await ctx.send(_("The command tree has not been synced."))
+                    return
+
+        await ctx.bot.tree.sync(guild=guild)
+        await ctx.send(
+            _("The command tree has been synced.")
+            if not guild
+            else _("The command tree has been synced for {guild}.").format(
+                guild=inline(guild.name)
+            )
+        )
