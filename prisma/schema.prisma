@@ -1,7 +1,7 @@
 generator client {
   provider             = "prisma-client-py"
-  recursive_type_depth = "5"
   interface            = "asyncio"
+  recursive_type_depth = "5"
 }
 
 datasource db {
@@ -11,8 +11,10 @@ datasource db {
 }
 
 model Core {
-  id   Int      @id @unique
-  cogs String[]
+  id                   Int      @id @unique
+  cogs                 String[]
+  notifyChannel        BigInt?
+  invitePermissionCode BigInt?
 }
 
 model User {

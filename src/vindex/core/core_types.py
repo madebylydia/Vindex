@@ -1,7 +1,9 @@
+import collections.abc
 import typing
 
 import discord
 from discord.ext import commands
+from discord.utils import MISSING as MISSING  # pylint: disable=unused-import
 
 import prisma
 
@@ -10,6 +12,26 @@ if typing.TYPE_CHECKING:
     import pathlib
 
     from vindex.core.bot import Vindex
+
+
+class SendMethodDict(typing.TypedDict):
+    """Typed dict for reusability of the "send" method if required."""
+
+    embeds: typing.NotRequired[collections.abc.Sequence[discord.Embed]]
+    files: typing.NotRequired[collections.abc.Sequence[discord.File]]
+    stickers: typing.NotRequired[
+        collections.abc.Sequence[discord.GuildSticker | discord.StickerItem]
+    ]
+    delete_after: typing.NotRequired[float]
+    nonce: typing.NotRequired[str | int]
+    allowed_mentions: typing.NotRequired[discord.AllowedMentions]
+    reference: typing.NotRequired[
+        discord.Message | discord.MessageReference | discord.PartialMessage
+    ]
+    mention_author: typing.NotRequired[bool]
+    view: typing.NotRequired[discord.ui.View]
+    suppress_embeds: typing.NotRequired[bool]
+    silent: typing.NotRequired[bool]
 
 
 class Context(commands.Context["Vindex"]):
@@ -38,9 +60,9 @@ class Context(commands.Context["Vindex"]):
         :py:class:`bool`
             Whether the reaction was successful.
         """
-        return await self.react_with("✅", to_message=to_message)
+        return await self.try_react_with("✅", to_message=to_message)
 
-    async def react_with(
+    async def try_react_with(
         self, emoji: "discord.message.EmojiInputType", *, to_message: discord.Message | None = None
     ) -> bool:
         """Attempt to react to the context message.
@@ -64,14 +86,6 @@ class Context(commands.Context["Vindex"]):
         except (discord.HTTPException, discord.Forbidden):
             return False
         return True
-
-
-class Cog(commands.Cog):
-    """Vindex's implementation of :py:class:`discord.ext.commands.Cog`.
-
-    Implements all methods of :py:class:`discord.ext.commands.Cog` and adds
-    some extra properties and methods.
-    """
 
 
 if typing.TYPE_CHECKING:

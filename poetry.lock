@@ -853,6 +853,17 @@ tomli = ">=1.2.2"
 poetry-plugin = ["poetry (>=1.0,<2.0)"]
 
 [[package]]
+name = "polib"
+version = "1.2.0"
+description = "A library to manipulate gettext files (po and mo files)."
+optional = false
+python-versions = "*"
+files = [
+    {file = "polib-1.2.0-py2.py3-none-any.whl", hash = "sha256:1c77ee1b81feb31df9bca258cbc58db1bbb32d10214b173882452c73af06d62d"},
+    {file = "polib-1.2.0.tar.gz", hash = "sha256:f3ef94aefed6e183e342a8a269ae1fc4742ba193186ad76f175938621dbfc26b"},
+]
+
+[[package]]
 name = "prisma"
 version = "0.11.0"
 description = "Prisma Client Python is an auto-generated and fully type-safe database client"
@@ -1345,4 +1356,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "6d4045843f2ee78adedc008522885248c3a3ee049c83afe4622409bcfd1d3c98"
+content-hash = "a2becdff7f645445add5a09f1e9efa36e15f6bc3a910aac01087a801e3561f60"

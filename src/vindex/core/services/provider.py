@@ -1,6 +1,7 @@
 import typing
 
 from .authorization import AuthorizationService
+from .cogs_manager import CogsManager
 from .i18n import I18nService
 
 if typing.TYPE_CHECKING:
@@ -18,14 +19,19 @@ class ServiceProvider:
     authorization: AuthorizationService
     """Authorization service"""
 
+    cogs_manager: CogsManager
+    """Cogs manager service"""
+
     def __init__(self, bot: "Vindex") -> None:
-        self.i18n = I18nService(bot)
+        self.cogs_manager = CogsManager(bot)
         self.authorization = AuthorizationService(bot)
+        self.i18n = I18nService(bot)
 
     async def prepare(self) -> None:
         """Prepare the services.
 
         This method should probably be ran as a task rather than a coroutine.
         """
-        await self.i18n.setup()
+        await self.cogs_manager.setup()
         await self.authorization.setup()
+        await self.i18n.setup()

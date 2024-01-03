@@ -1,3 +1,4 @@
+import abc
 import typing
 
 if typing.TYPE_CHECKING:
@@ -10,6 +11,7 @@ class Service(typing.Protocol):
     bot: "Vindex"
     """The bot instance."""
 
+    @abc.abstractmethod
     async def setup(self) -> None:
         """Setup the service."""
         raise NotImplementedError()
