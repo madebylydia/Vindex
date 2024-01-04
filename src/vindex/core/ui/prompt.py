@@ -35,7 +35,9 @@ class ConfirmView(discord.ui.View):
         self.stop()
 
     async def __aenter__(self) -> bool | None:
-        self.message = await self.ctx.send(**self.message_parameters, view=self)  # pyright: ignore[reportGeneralTypeIssues]
+        self.message = await self.ctx.send(
+            **self.message_parameters, view=self
+        )  # pyright: ignore[reportGeneralTypeIssues]
         await self.wait()
         await self.disable()
         self.stop()

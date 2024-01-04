@@ -17,7 +17,7 @@ from vindex.core.i18n import Translator, set_language_from_guild
 from vindex.core.services.provider import ServiceProvider
 
 if typing.TYPE_CHECKING:
-    from vindex.core.creator.model import Creator
+    from vindex.core.creator.model import CreatorData
 
 _log = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class Vindex(commands.AutoShardedBot):
 
     uptime: datetime
 
-    def __init__(self, creator: "Creator") -> None:
+    def __init__(self, creator: "CreatorData") -> None:
         self.creator = creator
         self.database = prisma.Prisma(datasource={"url": self.creator.build_db_url()})
         super().__init__(
@@ -220,8 +220,8 @@ class Vindex(commands.AutoShardedBot):
 
         settings_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)
         settings_table.add_row(_("Prefix"), f"[red]{self.command_prefix}")
-        settings_table.add_row(_("Version"), f"[red]{vindex_version}")
-        settings_table.add_row(_("d.py version"), f"[red]{discord.__version__}")
+        settings_table.add_row(_("Vindex version"), f"[red]{vindex_version}")
+        settings_table.add_row(_("Discord.py version"), f"[red]{discord.__version__}")
         settings_panel = Panel(settings_table, expand=False, title="Settings")
 
         stats_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)

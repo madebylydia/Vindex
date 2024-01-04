@@ -4,16 +4,10 @@ import pydantic
 from platformdirs import user_config_path
 
 
-class Creator(pydantic.BaseModel):
-    """The Creator model is a Object Oriented Model for the Creator file.
-    It is used by Pydantic to succesfully parse the file.
-    """
+class CreatorData(pydantic.BaseModel):
+    """An Instance represent the configuration data for a Vindex instance."""
 
-    PATH: typing.ClassVar = (
-        user_config_path("vindex", ensure_exists=True) / "creator.json"
-    ).resolve()
-
-    model_config = pydantic.ConfigDict(strict=True)
+    name: str
 
     token: str
     prefix: str
@@ -35,6 +29,20 @@ class Creator(pydantic.BaseModel):
             f"postgresql://{self.database_user}:{self.database_password}"
             f"@{self.database_host}/{self.database_name}"
         )
+
+
+class Creator(pydantic.BaseModel):
+    """The Creator model is a Object Oriented Model for the Creator file.
+    It is used by Pydantic to succesfully parse the file.
+    """
+
+    PATH: typing.ClassVar = (
+        user_config_path("vindex", ensure_exists=True) / "creator.json"
+    ).resolve()
+
+    model_config = pydantic.ConfigDict(strict=True)
+
+    instances: dict[str, CreatorData]
 
     def commit(self):
         """Commit the Creator to the file system.

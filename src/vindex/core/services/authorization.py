@@ -150,7 +150,7 @@ class AuthorizationService(Service):
         is_allowed = await self.is_allowed(guild.id)
 
         await self.bot.core_notify(
-            f"{self.bot.user.name} has joined a new guild: {guild.name} ({guild.id})",
+            content=f"{self.bot.user.name} has joined a new guild: {guild.name} ({guild.id})",
             embeds=[self.build_embed(guild, is_allowed)],
         )
 

@@ -1,3 +1,4 @@
+import collections.abc
 import typing
 
 from vindex.core.services.proto import Service
@@ -9,8 +10,8 @@ if typing.TYPE_CHECKING:
 class CompareDict(typing.TypedDict):
     """A typed dict used for the :py:meth:`CogsManager.compare` method."""
 
-    local_not_db: set[str]
-    db_not_local: set[str]
+    local_not_db: collections.abc.Iterable[str]
+    db_not_local: collections.abc.Iterable[str]
 
 
 class CogsManager(Service):
@@ -101,8 +102,8 @@ class CogsManager(Service):
         core = await self.bot.database.core.find_unique_or_raise({"id": 1})
         cogs = core.cogs
         return {
-            "local_not_db": self.loaded_cogs - cogs,
-            "db_not_local": cogs - self.loaded_cogs,
+            "local_not_db": [cog for cog in self.loaded_cogs if cog not in cogs],
+            "db_not_local": [cog for cog in cogs if cog not in self.loaded_cogs],
         }
 
     # async def update(self) -> None:

@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 import click
@@ -14,9 +15,12 @@ _log = logging.getLogger(__name__)
 
 
 @click.command()
+@click.argument("name", required=True)
 @click.option("--log-level", type=click.IntRange(0, 50), default=30)
-def start(log_level: int):
+def start(name: str, log_level: int):
     """Start Vindex."""
+    os.environ["PYTHONOPTIMIZE"] = "1"
+
     logging.basicConfig(
         datefmt="%H:%M:%S",
         format="%(name)s (%(funcName)s) : %(message)s",
@@ -39,11 +43,19 @@ def start(log_level: int):
         )
         sys.exit(1)
 
+    instance = creator.instances.get(name)
+    if not instance:
+        console.print(
+            f"[red]It appears that you do not have an instance called [blue]{name}[/blue]. "
+            f"Please run [blue]vindex setup {name}[/blue] to setup this instance."
+        )
+        sys.exit(1)
+
     async def async_start():
-        vindex = Vindex(creator)
+        vindex = Vindex(instance)
         try:
             async with vindex as bot:
-                await bot.start(creator.token)
+                await bot.start(instance.token)
         finally:
             _log.warning("Bot terminated. Disconnecting from database...")
             await vindex.database.disconnect()
