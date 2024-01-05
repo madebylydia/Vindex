@@ -9,7 +9,8 @@ from vindex.core.exceptions.invalid_creator import CreatorException
 
 
 @click.command()
-def updateenv():
+@click.argument("instance_name", type=str)
+def updateenv(instance_name: str):
     """Update your .env file with the database URL."""
     console = rich.get_console()
 
@@ -22,8 +23,17 @@ def updateenv():
         )
         return
 
+    instance = creator.instances.get(instance_name)
+    if not instance:
+        console.print(
+            f"[red]No instance with the name [blue]{instance_name}[/blue] exists."
+        )
+        return
+
     env_file = pathlib.Path(os.getcwd()) / ".env"
     with env_file as file:
+        if not file.exists():
+            file.touch()
         env_content = file.read_text()
 
     env_lines_separated = [line.split("=") for line in env_content.split("\n")]
@@ -31,7 +41,7 @@ def updateenv():
     edited = False
     for line in env_lines_separated:
         if line[0] == "DATABASE_URL":
-            line[1] = creator.build_db_url()
+            line[1] = instance.build_db_url()
             edited = True
             break
         if line[0] == "":
@@ -39,7 +49,8 @@ def updateenv():
             break
 
     if not edited:
-        env_lines_separated.append(["DATABASE_URL", creator.build_db_url()])
+        # ... then create the line
+        env_lines_separated.append(["DATABASE_URL", instance.build_db_url()])
 
     env_content = "\n".join(["=".join(line) for line in env_lines_separated])
 

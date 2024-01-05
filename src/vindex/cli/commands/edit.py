@@ -3,17 +3,18 @@ import rich
 from rich.prompt import Confirm, IntPrompt
 
 from vindex.cli.utils import Prompt
-from vindex.core.creator import Creator, fetch_creator
+from vindex.core.creator import CreatorData, fetch_creator
 from vindex.core.exceptions.invalid_creator import CreatorException
 
 
-def build_list(creator: Creator) -> dict[int, str]:
+def build_list(creator: CreatorData) -> dict[int, str]:
     """Create a dictionnary for a list of editable values inside the Creator."""
     return dict(enumerate(creator.model_dump().keys()))
 
 
 @click.command()
-def edit():
+@click.argument("name", required=True)
+def edit(name: str):
     """Edit your Vindex Creator."""
     console = rich.get_console()
 
@@ -23,11 +24,18 @@ def edit():
         click.echo(e)
         return
 
+    instance = creator.instances.get(name)
+    if not instance:
+        console.print(
+            f"[red]No instance with the name [blue]{name}[/blue] exists."
+        )
+        return
+
     console.clear()
     console.print("[green]What would you like to edit?")
 
     while True:
-        choices = build_list(creator)
+        choices = build_list(instance)
 
         console.print(
             "\n".join(f"[cyan]{index}[/cyan] [yellow]{value}" for index, value in choices.items())

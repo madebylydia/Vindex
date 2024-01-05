@@ -17,17 +17,24 @@ To abort this setup, press [magenta]Ctrl + C[/magenta] at any moment.
 
 
 @click.command()
-@click.argument("name", required=True)
-def setup(name: str):
+@click.argument("instance_name", required=True)
+def setup(instance_name: str):
     """Setup your Vindex instance."""
-    name = "".join(char.lower() for char in name if char.isalnum())
+    instance_name = "".join(char.lower() for char in instance_name if char.isalnum())
 
     console = rich.get_console()
+
+    creator = fetch_creator()
+    if instance_name in creator.instances:
+        console.print(
+            f"[bold red]:x-emoji: An instance with the name [blue]{instance_name}[/] already exists!"
+        )
+        return
 
     console.clear()
     console.print(SETUP_INTRO)
     console.print(
-        f'[italic blue]:information-emoji: We will now create an instance called "{name}"'
+        f'[italic blue]:information-emoji: We will now create an instance called "{instance_name}"\n'
     )
 
     console.print("[yellow]:key-emoji: What is your bot's token?")
@@ -48,9 +55,8 @@ def setup(name: str):
     console.print("[yellow]:floppy_disk-emoji: What is your database host?")
     database_host = Prompt.ask()
 
-    creator = fetch_creator()
     data = CreatorData(
-        name=name,
+        name=instance_name,
         token=token,
         prefix=prefix,
         database_name=database_name,
@@ -58,7 +64,7 @@ def setup(name: str):
         database_password=database_password,
         database_host=database_host,
     )
-    creator.instances[name] = data
+    creator.instances[instance_name] = data
 
     console.print(data)
 
@@ -67,4 +73,4 @@ def setup(name: str):
         console.print(
             "[bold green]:white_check_mark-emoji: The Creator has been succesfully committed!"
         )
-        updateenv()
+        updateenv([instance_name])

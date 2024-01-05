@@ -15,9 +15,9 @@ _log = logging.getLogger(__name__)
 
 
 @click.command()
-@click.argument("name", required=True)
+@click.argument("instance_name", required=True)
 @click.option("--log-level", type=click.IntRange(0, 50), default=30)
-def start(name: str, log_level: int):
+def start(instance_name: str, log_level: int):
     """Start Vindex."""
     os.environ["PYTHONOPTIMIZE"] = "1"
 
@@ -43,11 +43,11 @@ def start(name: str, log_level: int):
         )
         sys.exit(1)
 
-    instance = creator.instances.get(name)
+    instance = creator.instances.get(instance_name)
     if not instance:
         console.print(
-            f"[red]It appears that you do not have an instance called [blue]{name}[/blue]. "
-            f"Please run [blue]vindex setup {name}[/blue] to setup this instance."
+            f"[red]It appears that you do not have an instance called [blue]{instance_name}[/blue]. "
+            f"Please run [blue]vindex setup {instance_name}[/blue] to setup this instance."
         )
         sys.exit(1)
 

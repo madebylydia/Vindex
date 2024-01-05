@@ -110,7 +110,7 @@ class Translator:
 
         for locale_file in locales_path.iterdir():
             if locale_file.suffix != ".po":
-                _log.error('Non ".po" file found, ignoring. This should not exist.')
+                _log.debug('Non ".po" file found, ignoring. This should not exist.')
                 continue
 
             locale = locale_file.stem
