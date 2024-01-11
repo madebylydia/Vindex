@@ -2,11 +2,11 @@ import typing
 
 from discord.ext import commands
 
-from vindex.core.core_types import Context
 from vindex.core.i18n import Translator
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
+    from vindex.core.core_types import Context
 
 _ = Translator("Dev", __file__)
 
@@ -21,23 +21,23 @@ class Dev(commands.Cog):
         super().__init__()
 
     @commands.command()
-    async def ping(self, ctx: Context):
+    async def ping(self, ctx: "Context"):
         """Ping! Pong! Have some fun!"""
         await ctx.send("Pong!")
 
     @commands.is_owner()
     @commands.group("dev", aliases=["d"])
-    async def cmd_dev(self, ctx: Context):
+    async def cmd_dev(self, ctx: "Context"):
         """Development related commands.
         Only available to the owner.
         """
 
     @cmd_dev.group("orphan")
-    async def cmd_dev_orphan(self, ctx: Context):
+    async def cmd_dev_orphan(self, ctx: "Context"):
         """Analyze orphans objects."""
 
     @cmd_dev_orphan.command("guilds")
-    async def cmd_dev_orphan_guilds(self, ctx: Context):
+    async def cmd_dev_orphan_guilds(self, ctx: "Context"):
         """List all orphans guilds."""
         # An orphan guild is a guild that is not registered inside the database
         # but the bot is still in it.

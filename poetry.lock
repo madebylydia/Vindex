@@ -279,20 +279,6 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
-name = "clickloader"
-version = "0.2.0"
-description = "Click Command Loader, permit to load Click command from a given folder."
-optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "clickloader-0.2.0-py3-none-any.whl", hash = "sha256:afe10548b98711d14e2283f3d4e4c188d7dff814c6ef08ba502ab60d5302360b"},
-    {file = "clickloader-0.2.0.tar.gz", hash = "sha256:ab2adedc698f253077e644de4146ef783eb21cd64abfaba31a1b182125577d49"},
-]
-
-[package.dependencies]
-click = ">=8.0"
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -1356,4 +1342,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "a2becdff7f645445add5a09f1e9efa36e15f6bc3a910aac01087a801e3561f60"
+content-hash = "aa79d8e0b47a1745e39406f421ad590aa3e9e07a8b852fe02ad3b07f342fb118"

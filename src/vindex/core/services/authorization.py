@@ -83,11 +83,11 @@ class AuthorizationService(Service):
             ),
         )
 
-        assert self.bot.user is not None
+        assert self.bot.user
         embed.set_footer(
-            text="This guild was approved."
+            text=_("This guild was approved.")
             if is_allowed
-            else "This guild was left automatically as it hasn't been approved.",
+            else _("This guild was left automatically as it hasn't been approved."),
             icon_url=self.bot.user.avatar.url if self.bot.user.avatar else None,
         )
 
@@ -146,7 +146,7 @@ class AuthorizationService(Service):
         guild : discord.Guild
             The guild that joined.
         """
-        assert self.bot.user is not None
+        assert self.bot.user
         is_allowed = await self.is_allowed(guild.id)
 
         await self.bot.core_notify(
@@ -166,4 +166,4 @@ class AuthorizationService(Service):
         guilds = await self.bot.database.guild.find_many()
         for guild in guilds:
             self._cache[guild.id] = guild.allowed
-        _log.debug("Done caching all guilds autorization.")
+        _log.debug(_("Done caching all guilds autorization."))

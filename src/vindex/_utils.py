@@ -1,7 +1,6 @@
 import pathlib
 import subprocess
 
-import click
 import rich
 
 from vindex import __file__ as _vindex_path
@@ -13,12 +12,9 @@ PATHS_TO_TRANSLATE = [
 ]
 
 
-@click.command()
-def localegenerate():
+def translate_project():
     """Generate locales files."""
     console = rich.get_console()
-
-    console.print("[yellow]This command is a work in progress.[/]")
 
     for main_path in PATHS_TO_TRANSLATE:
         for root_path, _, files in main_path.walk():

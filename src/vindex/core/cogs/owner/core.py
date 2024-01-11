@@ -20,8 +20,11 @@ class Owner(commands.Cog):
     Used for bot's administration & management.
     """
 
+    last_loaded_cog: str | None = None
+
     def __init__(self, bot: "Vindex") -> None:
         self.bot = bot
+        self.last_loaded_cog = None
         super().__init__()
 
     @commands.is_owner()
@@ -93,18 +96,24 @@ class Owner(commands.Cog):
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
     @commands.command(name="reload")
-    async def cmd_owner_reload(self, ctx: "Context", cog: str):
+    async def cmd_owner_reload(self, ctx: "Context", cog: str | None = None):
         """Reload a cog."""
+        if not cog:
+            if not self.last_loaded_cog:
+                await ctx.send(_("You must specify a cog to reload."))
+                return
+            cog = self.last_loaded_cog
         try:
             await self.bot.services.cogs_manager.reload(cog)
             await ctx.send(_("{cog} has been reloaded.").format(cog=inline(cog)))
+            self.last_loaded_cog = cog
         except Exception as exception:
             exception_block = block(str(exception), "py")
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
     @commands.command(name="unload")
     async def cmd_owner_unload(self, ctx: "Context", cog: str):
-        """Unoad a cog."""
+        """Unload a cog."""
         try:
             await self.bot.services.cogs_manager.unload(cog)
             await ctx.send(_("{cog} has been unloaded.").format(cog=inline(cog)))
@@ -112,9 +121,30 @@ class Owner(commands.Cog):
             exception_block = block(str(exception), "py")
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
+    @commands.command(name="cogs")
+    async def cmd_owner_cogs(self, ctx: "Context"):
+        """List loaded cogs."""
+        cogs = self.bot.extensions
+
+        embed = discord.Embed(
+            title=_("Loaded Cogs ({count})").format(count=len(cogs)), color=ctx.color
+        )
+        embed.description = ", ".join([inline(cog) for cog in cogs])
+
+        await ctx.send(embed=embed)
+
+        async with ctx.typing():
+            unloaded = await ctx.db.externalcog.find_many(where={"loaded": False})
+            embed = discord.Embed(
+                title=_("Known unloaded cogs ({count})").format(count=len(unloaded)),
+                color=ctx.color,
+            )
+            embed.description = ", ".join([inline(cog.path) for cog in unloaded])
+            await ctx.send(embed=embed)
+
     @cmd_owner.command(name="sync")
     async def cmd_owner_sync(self, ctx: "Context", guild: discord.Guild | None = None):
-        """Sync the database."""
+        """Sync the command tree for a guild or globally."""
         if guild is None:
             view = ConfirmView(
                 ctx, content=_("Are you sure you want to synchronise the whole tree globally?")

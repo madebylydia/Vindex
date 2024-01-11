@@ -1,38 +1,50 @@
 generator client {
   provider             = "prisma-client-py"
   interface            = "asyncio"
-  recursive_type_depth = "5"
+  // I actually love prisma python, seriously...
+  recursive_type_depth = -1
 }
 
 datasource db {
   provider     = "postgresql"
-  url          = env("DATABASE_URL")
+  url          = env("VINDEX_DB_URL")
   relationMode = "foreignKeys"
 }
 
 model Core {
-  id                   Int      @id @unique
-  cogs                 String[]
+  id                   Int     @id @unique @default(1)
   notifyChannel        BigInt?
   invitePermissionCode BigInt?
 }
 
-model User {
-  id             BigInt   @id @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  modules        String[]
-  participatesTo Event[]
+model ExternalCog {
+  /// The path will be the module's path using dot notation
+  path   String  @id @unique
+  loaded Boolean
 }
 
-model Event {
-  id           Int      @id @unique @default(autoincrement())
-  guildId      BigInt
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  happensAt    DateTime
-  guild        Guild    @relation(fields: [guildId], references: [id])
-  participants User[]
+model User {
+  id        BigInt     @id @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  modules   String[]
+  blacklist Blacklist?
+
+  // Attribute used by bot mods.
+  isBotMod         Boolean     @default(false)
+  createdBlacklist Blacklist[] @relation("blacklistedBy")
+}
+
+model Blacklist {
+  id        BigInt   @id @unique
+  user      User     @relation(fields: [id], references: [id])
+  active    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reason          String
+  blacklistedBy   User   @relation("blacklistedBy", fields: [blacklistedById], references: [id])
+  blacklistedById BigInt
 }
 
 model Guild {
@@ -41,5 +53,4 @@ model Guild {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   allowed   Boolean  @default(false)
-  events    Event[]
 }

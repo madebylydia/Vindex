@@ -12,12 +12,14 @@ Install the bot by cloning the repository, and using `pip install .` or `poetry 
 
 ## Setup
 
-To setup a Vindex instance, use the `vindex setup` CLI command.
-This will start a new interactive session to request the information about your bot.
+To setup a Vindex instance, you need to set a few important environment variables.
+The bot runs thanks to Prisma and PostgreSQL. You first need to install and setup a correct installation of PostgreSQL first.
 
-In case you'd like to edit a value, use `vindex edit`.
+The environment variables that are necessary are:
 
-Starting your instance is as simple as running `vindex start`.
+- `VINDEX_TOKEN` : The token that will be used for the bot to connect.
+- `VINDEX_PREFIX` : The prefix that will be set. Default to `vindex ` if not set.
+- `VINDEX_DB_URL` : The URL to use to connect to the database. See [Prisma documentation directly](https://www.prisma.io/docs/orm/prisma-schema/overview/data-sources).
 
 ## Technologies
 
@@ -27,4 +29,4 @@ Vindex is proud of the technologies it uses.
 - PostgreSQL
 - Prisma
 - Click/Rich
-- gettext/Babel
+- pygettext3/Babel

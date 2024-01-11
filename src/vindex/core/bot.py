@@ -1,4 +1,6 @@
 import logging
+import pathlib
+import pkgutil
 import typing
 from datetime import datetime
 
@@ -17,7 +19,13 @@ from vindex.core.i18n import Translator, set_language_from_guild
 from vindex.core.services.provider import ServiceProvider
 
 if typing.TYPE_CHECKING:
-    from vindex.core.creator.model import CreatorData
+    from vindex.settings import Settings
+
+    # Something sadly stupid and ignorable
+    T = typing.TypeVar("T")
+    Coro = typing.Coroutine[typing.Any, typing.Any, T]
+    CoroFunc = typing.Callable[..., Coro[typing.Any]]
+    CFT = typing.TypeVar("CFT", bound=CoroFunc)
 
 _log = logging.getLogger(__name__)
 
@@ -59,16 +67,20 @@ class Vindex(commands.AutoShardedBot):
 
     uptime: datetime
 
-    def __init__(self, creator: "CreatorData") -> None:
-        self.creator = creator
-        self.database = prisma.Prisma(datasource={"url": self.creator.build_db_url()})
+    bot_mods: list[int]
+
+    def __init__(self, settings: "Settings") -> None:
+        self.settings = settings
+        self.database = prisma.Prisma(datasource={"url": self.settings.database_url})
         super().__init__(
-            creator.prefix,
+            commands.when_mentioned_or(settings.prefix),
             description="Vindex - A DCS helper",
             intents=discord.Intents.all(),
         )
         self.services = ServiceProvider(self)
         self.help_command = VindexHelp()
+
+        self.add_check(self.check_is_blacklisted)
 
     @property
     def owner_name(self) -> str | None:
@@ -85,6 +97,49 @@ class Vindex(commands.AutoShardedBot):
         if self.application.team:
             return self.application.team.name
         return self.application.owner.name
+
+    async def add_bot_mod(self, user: discord.abc.User, /) -> None:
+        """Add a bot moderator.
+
+        Parameters
+        ----------
+        user: discord.abc.User
+            The user to add.
+        """
+        await self.database.user.upsert(
+            where={"id": user.id},
+            data={"create": {"id": user.id, "isBotMod": True}, "update": {"isBotMod": True}},
+        )
+        self.bot_mods.append(user.id)
+
+    async def remove_bot_mod(self, user: discord.abc.User, /) -> None:
+        """Remove a bot moderator.
+
+        Parameters
+        ----------
+        user: discord.abc.User
+            The user to remove.
+        """
+        await self.database.user.upsert(
+            where={"id": user.id},
+            data={"create": {"id": user.id, "isBotMod": False}, "update": {"isBotMod": False}},
+        )
+        self.bot_mods.remove(user.id)
+
+    async def is_bot_mod(self, user: discord.abc.User, /) -> bool:
+        """Check if a user is a bot moderator.
+
+        Parameters
+        ----------
+        user: discord.abc.User
+            The user to check.
+
+        Returns
+        -------
+        bool
+            Whether the user is a bot moderator or not.
+        """
+        return await self.is_owner(user) or user.id in self.bot_mods
 
     async def core_notify(self, **kwargs: typing.Unpack[SendMethodDict]) -> discord.Message | None:
         """Send a message to the core notification channel.
@@ -120,16 +175,19 @@ class Vindex(commands.AutoShardedBot):
         try:
             await self.database.core.find_unique_or_raise({"id": 1})
         except prisma.errors.RecordNotFoundError:
-            await self.database.core.create({"id": 1, "cogs": [], "notifyChannel": None})
+            await self.database.core.create({"id": 1})
+        self.bot_mods = [
+            user.id for user in await self.database.user.find_many(where={"isBotMod": True})
+        ]
 
         # Core cogs (Most-load cogs)
-        cogs = (
-            "core",
-            "owner",
+        modules = pkgutil.iter_modules(
+            [str(pathlib.Path(__file__, "..", "cogs").resolve())], prefix="vindex.core.cogs."
         )
-        for cog in cogs:
-            _log.debug("Loading core extension: %s", cog)
-            await self.load_extension(f"vindex.core.cogs.{cog}")
+        for module in modules:
+            if module.name.startswith("_"):
+                continue
+            await self.load_extension(module.name)
 
         # Jishaku cog
         await self.load_extension("jishaku")
@@ -146,29 +204,6 @@ class Vindex(commands.AutoShardedBot):
         self, origin: discord.Message | discord.Interaction, /, *, cls: type = Context
     ) -> Context:
         return await super().get_context(origin, cls=cls)
-
-    async def process_commands(self, message: discord.Message, /) -> None:
-        ctx = await self.get_context(message)
-
-        if ctx.author.bot:
-            return
-        if ctx.command is None:
-            return
-
-        if ctx.guild:
-            if not ctx.guild.me.guild_permissions.embed_links:
-                await ctx.send(
-                    _(
-                        "I require the `Embed Links` to work properly.\nAsk an administrator to "
-                        "give me the necessary permissions."
-                    )
-                )
-                return
-
-        # TODO: Must knoww if command has been invoked without its subcommand(s) and requires
-        # help to be sent
-
-        await self.invoke(ctx)
 
     async def on_command_error(  # pyright: ignore[reportIncompatibleMethodOverride]
         # Weirdest issue I ever had
@@ -201,13 +236,13 @@ class Vindex(commands.AutoShardedBot):
         await self.services.authorization.handle_new_guild(guild)
 
     async def on_connect(self):
-        assert self.user is not None
+        assert self.user
         activity = discord.CustomActivity(_("Vindex is connecting and setting up..."))
         await self.change_presence(status=discord.Status.idle, activity=activity)
         _log.info("Connected to Discord.")
 
     async def on_ready(self) -> None:
-        assert self.user is not None
+        assert self.user
         self.uptime = datetime.utcnow()
 
         console = rich.get_console()
@@ -236,6 +271,12 @@ class Vindex(commands.AutoShardedBot):
             status=discord.Status.online,
             activity=discord.CustomActivity(_("Flying the F-14B Tomcat")),
         )
+
+    # A few global checks
+
+    @staticmethod
+    async def check_is_blacklisted(ctx: Context):
+        return not ctx.bot.services.blacklist.is_blacklisted(ctx.author.id)
 
     async def on_message(self, message: discord.Message, /) -> None:
         await set_language_from_guild(self, message.guild.id if message.guild else None)

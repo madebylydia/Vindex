@@ -35,6 +35,9 @@ class SendMethodDict(typing.TypedDict):
     silent: typing.NotRequired[bool]
 
 
+BOT_COLOR = discord.Color.from_rgb(72, 184, 150)
+
+
 class Context(commands.Context["Vindex"]):
     """Vindex's implementation of :py:class:`discord.ext.commands.Context`.
 
@@ -46,6 +49,11 @@ class Context(commands.Context["Vindex"]):
     def db(self) -> prisma.Prisma:
         """Return the database instance connected to the bot."""
         return self.bot.database
+
+    @property
+    def color(self) -> discord.Color:
+        """Return the color used for embeds."""
+        return BOT_COLOR
 
     async def tick(self, *, to_message: discord.Message | None = None) -> bool:
         """Add a tick reaction to the message.

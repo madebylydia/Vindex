@@ -51,6 +51,7 @@ class ConfirmView(discord.ui.View):
     ):
         if not self.is_finished():
             await self.disable()
+            print("stopped")
             self.stop()
 
     async def disable(self):

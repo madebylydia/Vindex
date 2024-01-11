@@ -30,7 +30,7 @@ class Languages(enum.Enum):
     GERMAN = "de"
     ITALIAN = "it"
     JAPANESE = "ja"
-    NORWEGIAN = ""
+    NORWEGIAN = "no"
     POLISH = "pl"
     ROMANIAN = "ro"
     RUSSIAN = "ru"
@@ -110,7 +110,11 @@ class Translator:
 
         for locale_file in locales_path.iterdir():
             if locale_file.suffix != ".po":
-                _log.debug('Non ".po" file found, ignoring. This should not exist.')
+                if locale_file.suffix not in (".pot", ".mo"):
+                    _log.debug(
+                        'Non ".po" file found (%s), ignoring. This should not exist.',
+                        str(locale_file),
+                    )
                 continue
 
             locale = locale_file.stem
@@ -120,5 +124,5 @@ class Translator:
 
             for entry in po_class:
                 if entry.msgstr:
-                    _log.debug("%s=%s", entry.msgid, entry.msgstr)
+                    _log.log(0, "%s=%s", entry.msgid, entry.msgstr)
                     self.translations.setdefault(locale, {})[entry.msgid] = entry.msgstr

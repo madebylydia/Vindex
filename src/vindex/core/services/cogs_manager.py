@@ -1,10 +1,13 @@
 import collections.abc
+import logging
 import typing
 
 from vindex.core.services.proto import Service
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
+
+_log = logging.getLogger(__name__)
 
 
 class CompareDict(typing.TypedDict):
@@ -19,25 +22,19 @@ class CogsManager(Service):
     Needed as it interacts with the database too.
     """
 
-    _loaded_cogs: list[str]
-
     def __init__(self, bot: "Vindex") -> None:
         self.bot = bot
-        self._loaded_cogs = []
         super().__init__()
 
-    @property
-    def loaded_cogs(self) -> list[str]:
-        """Return the loaded cogs list."""
-        return self._loaded_cogs
-
-    async def load(self, cog: str):
+    async def load(self, cog: str, /, *, append_db: bool = True):
         """Load a cog using its module name.
 
         Parameters
         ----------
         cog : str
             The name of the cog to load.
+        append_db : bool
+            Whether to append the cog to the database or not once loaded.
 
         Raises
         ------
@@ -52,8 +49,22 @@ class CogsManager(Service):
             The extension or its setup function had an execution error.
         """
         await self.bot.load_extension(cog)
-        self._loaded_cogs.append(cog)
-        await self.bot.database.core.update(where={"id": 1}, data={"cogs": self.loaded_cogs})
+        if append_db:
+            _log.debug(f"Appending/Loading {cog} to the database")
+            await self.bot.database.externalcog.upsert(
+                where={
+                    "path": cog,
+                },
+                data={
+                    "create": {
+                        "path": cog,
+                        "loaded": True,
+                    },
+                    "update": {
+                        "loaded": True,
+                    },
+                },
+            )
 
     async def reload(self, cog: str):
         """Reload a cog using its module name.
@@ -78,7 +89,7 @@ class CogsManager(Service):
         # TODO: Remove cog if reload fails
         await self.bot.reload_extension(cog)
 
-    async def unload(self, cog: str):
+    async def unload(self, cog: str, /, *, append_db: bool = True):
         """Unload a cog using its module name.
 
         Parameters
@@ -94,16 +105,34 @@ class CogsManager(Service):
             The extension was not loaded.
         """
         await self.bot.unload_extension(cog)
-        self._loaded_cogs.remove(cog)
-        await self.bot.database.core.update(where={"id": 1}, data={"cogs": self.loaded_cogs})
+        if append_db:
+            _log.debug(f"Appending/Unloading {cog} to the database")
+            await self.bot.database.externalcog.upsert(
+                where={
+                    "path": cog,
+                },
+                data={
+                    "create": {
+                        "path": cog,
+                        "loaded": False,
+                    },
+                    "update": {
+                        "loaded": False,
+                    },
+                },
+            )
 
     async def compare(self) -> CompareDict:
         """Compare the cogs list inside the database with the loaded cogs."""
         core = await self.bot.database.core.find_unique_or_raise({"id": 1})
-        cogs = core.cogs
+        cogs = core.loadedCogs
+        if not cogs:
+            cogs = []
+        else:
+            cogs = [cog.path for cog in cogs]
         return {
-            "local_not_db": [cog for cog in self.loaded_cogs if cog not in cogs],
-            "db_not_local": [cog for cog in cogs if cog not in self.loaded_cogs],
+            "local_not_db": [cog for cog in self.bot.extensions if cog not in cogs],
+            "db_not_local": [cog for cog in cogs if cog not in self.bot.extensions],
         }
 
     # async def update(self) -> None:
@@ -111,6 +140,6 @@ class CogsManager(Service):
     #     core = await self.bot.database.core.find_unique_or_raise({"id": 1})
 
     async def setup(self) -> None:
-        core = await self.bot.database.core.find_unique_or_raise({"id": 1})
-        for cog in core.cogs:
-            await self.load(cog)
+        cogs = await self.bot.database.externalcog.find_many(where={"loaded": True})
+        for cog in cogs:
+            await self.load(cog.path, append_db=False)

@@ -1,5 +1,7 @@
 import typing
 
+from vindex.core.services.blacklist import BlacklistService
+
 from .authorization import AuthorizationService
 from .cogs_manager import CogsManager
 from .i18n import I18nService
@@ -19,12 +21,16 @@ class ServiceProvider:
     authorization: AuthorizationService
     """Authorization service"""
 
+    blacklist: BlacklistService
+    """Blacklist service"""
+
     cogs_manager: CogsManager
     """Cogs manager service"""
 
     def __init__(self, bot: "Vindex") -> None:
         self.cogs_manager = CogsManager(bot)
         self.authorization = AuthorizationService(bot)
+        self.blacklist = BlacklistService(bot)
         self.i18n = I18nService(bot)
 
     async def prepare(self) -> None:
@@ -34,4 +40,5 @@ class ServiceProvider:
         """
         await self.cogs_manager.setup()
         await self.authorization.setup()
+        await self.blacklist.setup()
         await self.i18n.setup()
