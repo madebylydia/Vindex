@@ -1,5 +1,17 @@
+import textwrap
+import typing
+from datetime import timedelta
+
+from babel.dates import format_timedelta as _format_timedelta
+from babel.lists import format_list as _format_list
+from babel.numbers import format_number as _format_number
 from discord.utils import escape_markdown as _escape_markdown
 from discord.utils import escape_mentions as _escape_mentions
+
+from vindex.core.i18n import get_babel_current_language
+
+if typing.TYPE_CHECKING:
+    from decimal import Decimal
 
 
 def bold(text: str) -> str:
@@ -226,3 +238,88 @@ def escape(text: str, *, mentions: bool = False, markdown: bool = True) -> str:
     if markdown:
         final = _escape_markdown(final)
     return final
+
+
+def reduce_to(text: str, max_length: int, *, placeholder: str = "...") -> str:
+    """Reduce a text to a maximum length.
+
+    Parameters
+    ----------
+    text : str
+        The text to reduce.
+    max_length : int
+        The maximum length of the text.
+    placeholder : str
+        The placeholder to use when the text is reduced.
+        Defaults to ``"..."``
+
+    Returns
+    -------
+    str
+        The reduced text.
+    """
+    return textwrap.shorten(text, width=max_length, placeholder=placeholder)
+
+
+def as_str_timedelta(delta: timedelta) -> str:
+    """Format a timedelta into a human-readable string.
+
+    Parameters
+    ----------
+    delta : timedelta
+        The timedelta to format.
+
+    Returns
+    -------
+    str
+        The formatted timedelta.
+    """
+    return _format_timedelta(delta, locale=get_babel_current_language())
+
+
+class Humanize:
+    """An utilitarian/factory class used for the "humanization" of strings.
+
+    This class is used to format numbers, dates, etc. in a human-readable way, with formatted
+    locale.
+    """
+
+    @staticmethod
+    def list(
+        items: list[str],
+        style: typing.Literal[
+            "standard", "standard-short", "or", "or-short", "unit", "unit-short", "unit-narrow"
+        ] = "standard",
+    ) -> str:
+        """Humanize a list of items.
+
+        Parameters
+        ----------
+        items : list[str]
+            The list of items to humanize.
+        style : str
+            The style to use for the humanization.
+            Defaults to ``"standard"``
+
+        Returns
+        -------
+        str
+            The humanized list.
+        """
+        return _format_list(items, style=style, locale=get_babel_current_language())
+
+    @staticmethod
+    def number(number: "float | Decimal | str") -> str:
+        """Humanize a number.
+
+        Parameters
+        ----------
+        number : int
+            The number to humanize.
+
+        Returns
+        -------
+        str
+            The humanized number.
+        """
+        return _format_number(number, locale=get_babel_current_language())

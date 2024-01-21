@@ -34,14 +34,15 @@ class ConfirmView(discord.ui.View):
         await self.disable()
         self.stop()
 
-    async def __aenter__(self) -> bool | None:
+    async def __aenter__(self) -> tuple[bool | None, discord.Message]:
         self.message = await self.ctx.send(
             **self.message_parameters, view=self
         )  # pyright: ignore[reportGeneralTypeIssues]
+        assert isinstance(self.message, discord.Message)  # type: ignore
         await self.wait()
         await self.disable()
         self.stop()
-        return self.value
+        return (self.value, self.message)
 
     async def __aexit__(
         self,
@@ -51,7 +52,6 @@ class ConfirmView(discord.ui.View):
     ):
         if not self.is_finished():
             await self.disable()
-            print("stopped")
             self.stop()
 
     async def disable(self):
@@ -72,7 +72,7 @@ class ConfirmView(discord.ui.View):
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.green, custom_id="yes")
     async def yes(self, interaction: discord.Interaction, _: discord.ui.Button[typing.Self]):
         self.value = True
-        await interaction.response.pong()
+        await interaction.response.defer()
         self.stop()
 
     @discord.ui.button(label="No", style=discord.ButtonStyle.red, custom_id="no")

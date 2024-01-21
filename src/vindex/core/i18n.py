@@ -4,15 +4,13 @@ import pathlib
 import typing
 from contextvars import ContextVar
 
+import babel.core
 import polib
 from discord.ext import commands
 
-from vindex.core.core_types import Context
-from vindex.core.ui.formatting import inline
-
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
-    from vindex.core.core_types import StrPathOrPath
+    from vindex.core.core_types import Context, StrPathOrPath
 
 
 _log = logging.getLogger(__name__)
@@ -37,7 +35,7 @@ class Languages(enum.Enum):
     SPANISH = "es"
 
     @classmethod
-    async def convert(cls, _: Context, argument: str):
+    async def convert(cls, _: "Context", argument: str):
         """Returns an instance of the Languages class from a string.
         This is meant to be used as a converter for commands.
         """
@@ -45,8 +43,13 @@ class Languages(enum.Enum):
             return cls(argument.lower())
         except ValueError as exception:
             raise commands.BadArgument(
-                f"The language {inline(argument)} is not supported."
+                f"The language `{argument}` is not supported."
             ) from exception
+
+
+def get_babel_current_language() -> babel.core.Locale:
+    """Return the current language used by the bot."""
+    return babel.core.Locale(_current_language.get())
 
 
 async def set_language_from_guild(bot: "Vindex", guild_id: int | None = None) -> None:

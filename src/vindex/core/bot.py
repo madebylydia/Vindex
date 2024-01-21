@@ -2,11 +2,14 @@ import logging
 import pathlib
 import pkgutil
 import typing
-from datetime import datetime
+from contextlib import suppress
 
 import discord
 import rich
+from discord import app_commands
+from discord.app_commands.errors import AppCommandError
 from discord.ext import commands
+from discord.interactions import Interaction
 from rich.box import MINIMAL
 from rich.columns import Columns
 from rich.panel import Panel
@@ -19,13 +22,9 @@ from vindex.core.i18n import Translator, set_language_from_guild
 from vindex.core.services.provider import ServiceProvider
 
 if typing.TYPE_CHECKING:
-    from vindex.settings import Settings
+    from datetime import datetime
 
-    # Something sadly stupid and ignorable
-    T = typing.TypeVar("T")
-    Coro = typing.Coroutine[typing.Any, typing.Any, T]
-    CoroFunc = typing.Callable[..., Coro[typing.Any]]
-    CFT = typing.TypeVar("CFT", bound=CoroFunc)
+    from vindex.settings import Settings
 
 _log = logging.getLogger(__name__)
 
@@ -52,11 +51,18 @@ t           E#t ..         G#E E##D.               tt i       tDj
 _ = Translator("Vindex", __file__)
 
 
-class VindexHelp(commands.MinimalHelpCommand):
-    """Custom help class handler for Vindex. WIP"""
+def get_intents() -> discord.Intents:
+    intents = discord.Intents.default()
+    intents.members = True
+    return intents
 
-    def __init__(self) -> None:
-        super().__init__(show_hidden=False, verify_checks=True)
+
+class VindexTree(app_commands.CommandTree["Vindex"]):
+    """Internal command tree for Vindex hybrid/app commands."""
+
+    async def on_error(self, interaction: Interaction["Vindex"], error: AppCommandError) -> None:
+        _log.error("Error inside the app commands tree", exc_info=True)
+        return await super().on_error(interaction, error)
 
 
 class Vindex(commands.AutoShardedBot):
@@ -65,7 +71,7 @@ class Vindex(commands.AutoShardedBot):
     This class is the main bot class, the "core" itself;
     """
 
-    uptime: datetime
+    uptime: "datetime"
 
     bot_mods: list[int]
 
@@ -73,14 +79,19 @@ class Vindex(commands.AutoShardedBot):
         self.settings = settings
         self.database = prisma.Prisma(datasource={"url": self.settings.database_url})
         super().__init__(
-            commands.when_mentioned_or(settings.prefix),
+            commands.when_mentioned,
+            tree_cls=VindexTree,
             description="Vindex - A DCS helper",
-            intents=discord.Intents.all(),
+            intents=get_intents(),
+            chunk_guilds_at_startup=False,
+            allowed_mentions=discord.AllowedMentions(
+                everyone=False, roles=False, users=True, replied_user=True
+            ),
         )
         self.services = ServiceProvider(self)
-        self.help_command = VindexHelp()
 
         self.add_check(self.check_is_blacklisted)
+        self.add_check(self.check_is_chunked_or_chunk)
 
     @property
     def owner_name(self) -> str | None:
@@ -166,9 +177,82 @@ class Vindex(commands.AutoShardedBot):
         assert isinstance(channel, discord.TextChannel)
         return await channel.send(**kwargs)
 
+    @typing.overload
+    async def get_or_fetch_user(
+        self, user_id: int, /, *, as_none: typing.Literal[False] = False
+    ) -> discord.User:
+        ...
+
+    @typing.overload
+    async def get_or_fetch_user(
+        self, user_id: int, /, *, as_none: typing.Literal[True] = True
+    ) -> discord.User | None:
+        ...
+
+    async def get_or_fetch_user(
+        self, user_id: int, /, *, as_none: bool = False
+    ) -> discord.User | None:
+        """Attempt to get an user from the bot's memory. In case it fails, attempt to fetch it
+        instead.
+
+        Parameters
+        ----------
+        user_id: int
+            The user ID to get or fetch.
+        as_none: bool
+            Whether to return None if the user was not found, or rather raise an exception.
+            Defaults to ``False``.
+
+        Raises
+        ------
+        discord.NotFound
+            If the user was not found.
+
+        Returns
+        -------
+        discord.User
+            The user fetched or None if it failed.
+        """
+        user = self.get_user(user_id)
+        if not user:
+            try:
+                user = await self.fetch_user(user_id)
+            except discord.NotFound:
+                if as_none:
+                    return None
+                raise
+        return user
+
+    async def get_or_fetch_member(self, guild: discord.Guild, user_id: int, /) -> discord.Member:
+        """Attempt to get a member from the bot's memory. In case it fails, attempt to fetch it
+        instead.
+
+        Parameters
+        ----------
+        guild: discord.Guild
+            The guild to get the member from.
+        user_id: int
+            The user ID to get or fetch.
+
+        Raises
+        ------
+        discord.NotFound
+            If the member was not found.
+
+        Returns
+        -------
+        discord.Member
+            The member fetched or None if it failed.
+        """
+        member = guild.get_member(user_id)
+        if not member:
+            member = await guild.fetch_member(user_id)
+        return member
+
     async def setup_hook(self) -> None:
         # Database stuff
         await self.database.connect()
+        prisma.register(self.database)
         _log.info("Connected to database.")
 
         # Ensuring there is a Core row existing
@@ -192,9 +276,9 @@ class Vindex(commands.AutoShardedBot):
         # Jishaku cog
         await self.load_extension("jishaku")
 
-        timer_start = datetime.now()
+        timer_start = discord.utils.utcnow()
         await self.services.prepare()
-        timer_end = datetime.now()
+        timer_end = discord.utils.utcnow()
         _log.debug("Services took %s to prepare.", timer_end - timer_start)
 
         _log.info("Done setting up Vindex.")
@@ -212,11 +296,18 @@ class Vindex(commands.AutoShardedBot):
         exception: commands.errors.CommandError,
         /,
     ) -> None:
+        if self.extra_events.get("on_command_error", None):
+            return
         if context.command and context.command.has_error_handler():
             return
         if context.cog and context.cog.has_error_handler():
             return
 
+        if isinstance(exception, commands.errors.HybridCommandError):
+            exception = exception.original  # type: ignore
+
+        if isinstance(exception, commands.errors.NotOwner):
+            return
         if isinstance(exception, commands.errors.CommandNotFound):
             await context.send(_("Could not find such command."))
             return
@@ -226,14 +317,24 @@ class Vindex(commands.AutoShardedBot):
             await context.send_help(context.command)
             return
 
+        if isinstance(exception, discord.errors.HTTPException):
+            with suppress(discord.errors.HTTPException):
+                await context.send(
+                    _(
+                        "An internal error occured. This look like an unhandled error. Feel free to try "
+                        "again. If this error keep occuring, please contact the bot owner."
+                    )
+                )
+
+        await self.core_notify(
+            content=(
+                "An error occured while executing a command. Please check internal log for "
+                "traceback."
+            )
+        )
         _log.exception(
             "An error occured while executing a command: %s", context.command, exc_info=exception
         )
-        await super().on_command_error(context, exception)
-
-    async def on_guild_join(self, guild: discord.Guild):
-        _log.info("Joined guild: %s", guild.name)
-        await self.services.authorization.handle_new_guild(guild)
 
     async def on_connect(self):
         assert self.user
@@ -243,7 +344,7 @@ class Vindex(commands.AutoShardedBot):
 
     async def on_ready(self) -> None:
         assert self.user
-        self.uptime = datetime.utcnow()
+        self.uptime = discord.utils.utcnow()
 
         console = rich.get_console()
         console.print(VINDEX_HEADER)
@@ -254,7 +355,7 @@ class Vindex(commands.AutoShardedBot):
         )
 
         settings_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)
-        settings_table.add_row(_("Prefix"), f"[red]{self.command_prefix}")
+        settings_table.add_row(_("Prefix"), f"[red]<@{self.user.id}>")
         settings_table.add_row(_("Vindex version"), f"[red]{vindex_version}")
         settings_table.add_row(_("Discord.py version"), f"[red]{discord.__version__}")
         settings_panel = Panel(settings_table, expand=False, title="Settings")
@@ -277,6 +378,14 @@ class Vindex(commands.AutoShardedBot):
     @staticmethod
     async def check_is_blacklisted(ctx: Context):
         return not ctx.bot.services.blacklist.is_blacklisted(ctx.author.id)
+
+    @staticmethod
+    async def check_is_chunked_or_chunk(ctx: Context):
+        if not ctx.guild:
+            return True
+        if not ctx.guild.chunked:
+            await ctx.guild.chunk()
+        return True
 
     async def on_message(self, message: discord.Message, /) -> None:
         await set_language_from_guild(self, message.guild.id if message.guild else None)

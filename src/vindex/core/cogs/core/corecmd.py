@@ -7,7 +7,7 @@ from discord.ext import commands
 from vindex import __version__
 from vindex.core.core_types import Context, GuildContext
 from vindex.core.i18n import Languages, Translator
-from vindex.core.ui import inline
+from vindex.core.ui.formatting import inline
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
@@ -32,7 +32,10 @@ class Core(commands.Cog):
 
     @cmd_set.command(
         "locale",
-        description="Get or set the locale of your server. Use no argument to see which language you're currently using.",
+        description=(
+            "Get or set the locale of your server. Use no argument to see which language you're "
+            "currently using."
+        ),
     )
     @app_commands.describe(locale="Language to use for the server.")
     async def cmd_set_locale(self, ctx: GuildContext, locale: Languages | None = None):

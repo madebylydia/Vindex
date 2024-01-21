@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import logging
 import logging.handlers
+import subprocess
 import sys
 
 import dotenv
@@ -23,6 +24,14 @@ class VindexNamespace(argparse.Namespace):
     version: bool
     disable_rich: bool
     log_level: int
+    prisma_generate: bool
+    prisma_migrate: bool
+
+
+def run_command(command: str) -> None:
+    """Run a provided command in the current shell by creating a new process."""
+    with subprocess.Popen(command, shell=True) as process:
+        process.wait()
 
 
 def parse_arguments() -> VindexNamespace:
@@ -42,21 +51,20 @@ def parse_arguments() -> VindexNamespace:
         help="Set the log level. Defaults to INFO (20).",
     )
     parser.add_argument(
-        "--ignore-guild-whitelist",
+        "--prisma-generate",
         action="store_true",
-        help=(
-            "Ignore the guild whitelist and allow the bot to join any guild. Useful for "
-            "development purposes."
-        ),
+        help="Generate the Prisma client.",
+    )
+    parser.add_argument(
+        "--prisma-migrate",
+        action="store_true",
+        help="Attempt to migrate the database.",
     )
     return parser.parse_args(sys.argv[1:], namespace=VindexNamespace())
 
 
 def main():
     """Start Vindex."""
-    if __debug__:
-        dotenv.load_dotenv()
-
     arguments = parse_arguments()
 
     logging.basicConfig(
@@ -80,8 +88,11 @@ def main():
         )
 
     console = rich.get_console()
-
     console.print("[yellow]Starting engine, stand by...[/]")
+
+    if __debug__:
+        _log.info("Loading .env environment variables...")
+        dotenv.load_dotenv(dotenv.find_dotenv())
 
     settings = read_settings()
 
@@ -93,6 +104,11 @@ def main():
         finally:
             _log.warning("Bot terminated. Disconnecting from database...")
             await vindex.database.disconnect()
+
+    if arguments.prisma_generate:
+        run_command("prisma generate")
+    if arguments.prisma_migrate:
+        run_command("prisma migrate deploy")
 
     try:
         uvloop.run(async_start())

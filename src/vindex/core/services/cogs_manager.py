@@ -2,6 +2,8 @@ import collections.abc
 import logging
 import typing
 
+from prisma.models import ExternalCog
+
 from vindex.core.services.proto import Service
 
 if typing.TYPE_CHECKING:
@@ -50,8 +52,8 @@ class CogsManager(Service):
         """
         await self.bot.load_extension(cog)
         if append_db:
-            _log.debug(f"Appending/Loading {cog} to the database")
-            await self.bot.database.externalcog.upsert(
+            _log.debug("Appending/Loading %s to the database", cog)
+            await ExternalCog.prisma().upsert(
                 where={
                     "path": cog,
                 },
@@ -96,6 +98,8 @@ class CogsManager(Service):
         ----------
         cog : str
             The name of the cog to unload.
+        append_db : bool
+            Whether to append the cog to the database or not once unloaded.
 
         Raises
         ------
@@ -106,8 +110,8 @@ class CogsManager(Service):
         """
         await self.bot.unload_extension(cog)
         if append_db:
-            _log.debug(f"Appending/Unloading {cog} to the database")
-            await self.bot.database.externalcog.upsert(
+            _log.debug("Appending/Unloading %s to the database", cog)
+            await ExternalCog.prisma().upsert(
                 where={
                     "path": cog,
                 },
@@ -124,8 +128,7 @@ class CogsManager(Service):
 
     async def compare(self) -> CompareDict:
         """Compare the cogs list inside the database with the loaded cogs."""
-        core = await self.bot.database.core.find_unique_or_raise({"id": 1})
-        cogs = core.loadedCogs
+        cogs = await ExternalCog.prisma().find_many()
         if not cogs:
             cogs = []
         else:
@@ -135,11 +138,7 @@ class CogsManager(Service):
             "db_not_local": [cog for cog in cogs if cog not in self.bot.extensions],
         }
 
-    # async def update(self) -> None:
-    #     """Update the locale cache with the cogs list inside the database."""
-    #     core = await self.bot.database.core.find_unique_or_raise({"id": 1})
-
     async def setup(self) -> None:
-        cogs = await self.bot.database.externalcog.find_many(where={"loaded": True})
+        cogs = await ExternalCog.prisma().find_many(where={"loaded": True})
         for cog in cogs:
             await self.load(cog.path, append_db=False)

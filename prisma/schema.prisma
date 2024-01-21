@@ -24,33 +24,56 @@ model ExternalCog {
 }
 
 model User {
-  id        BigInt     @id @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  modules   String[]
-  blacklist Blacklist?
+  id        BigInt   @id @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Attribute used by bot mods.
+  profile Profile?
+
+  // Attributes used by bot mods.
   isBotMod         Boolean     @default(false)
   createdBlacklist Blacklist[] @relation("blacklistedBy")
+  allowedGuilds    Guild[]     @relation("allowedBy")
+}
+
+model Profile {
+  id        BigInt   @id @unique
+  user      User     @relation(fields: [id], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  color       String?
+  description String?        @db.Char(4096)
+  fields      ProfileField[]
+  modules     String[]
+}
+
+model ProfileField {
+  id        BigInt  @id @unique
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId BigInt
+
+  name  String
+  value String
 }
 
 model Blacklist {
-  id        BigInt   @id @unique
-  user      User     @relation(fields: [id], references: [id])
-  active    Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id              BigInt   @id @unique
   reason          String
-  blacklistedBy   User   @relation("blacklistedBy", fields: [blacklistedById], references: [id])
+  blacklistedBy   User     @relation("blacklistedBy", fields: [blacklistedById], references: [id])
   blacklistedById BigInt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Guild {
-  id        BigInt   @id @unique
-  locale    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  allowed   Boolean  @default(false)
+  id              BigInt    @id @unique
+  allowed         Boolean?
+  allowanceBy     User?     @relation("allowedBy", fields: [allowanceById], references: [id])
+  allowanceById   BigInt?
+  allowanceAt     DateTime?
+  allowanceReason String?
+  locale          String    @default("en")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

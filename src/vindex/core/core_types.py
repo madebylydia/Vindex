@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord.utils import MISSING as MISSING  # pylint: disable=unused-import
 
 import prisma
+from vindex.core.i18n import Translator
 
 if typing.TYPE_CHECKING:
     import os
@@ -38,6 +39,9 @@ class SendMethodDict(typing.TypedDict):
 BOT_COLOR = discord.Color.from_rgb(72, 184, 150)
 
 
+_ = Translator("Core", __file__)
+
+
 class Context(commands.Context["Vindex"]):
     """Vindex's implementation of :py:class:`discord.ext.commands.Context`.
 
@@ -54,6 +58,21 @@ class Context(commands.Context["Vindex"]):
     def color(self) -> discord.Color:
         """Return the color used for embeds."""
         return BOT_COLOR
+
+    async def send_pm_or_report(
+        self, **kwargs: typing.Unpack[SendMethodDict]
+    ) -> discord.Message | None:
+        """Send a message to the author's DM."""
+        try:
+            await self.author.send(**kwargs)
+        except discord.Forbidden:
+            await self.send(
+                _(
+                    "I tried to send you a private message, but I was unable to do so. Either "
+                    "you have blocked me, or you have disabled your private messages globally "
+                    "or in this server."
+                )
+            )
 
     async def tick(self, *, to_message: discord.Message | None = None) -> bool:
         """Add a tick reaction to the message.

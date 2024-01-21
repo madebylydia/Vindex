@@ -15,6 +15,12 @@ if typing.TYPE_CHECKING:
 _ = Translator("Owner", __file__)
 
 
+class CogLogicFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
+    """Flags for cog logic."""
+
+    total: bool = commands.flag(name="total", default=False)
+
+
 class Owner(commands.Cog):
     """Commands reserved for the owner.
     Used for bot's administration & management.
@@ -35,34 +41,6 @@ class Owner(commands.Cog):
         """
         # if not ctx.invoked_subcommand:
         #     await ctx.send_help(ctx.command)
-
-    @cmd_owner.group(name="authorization")
-    async def cmd_owner_authorization(self, ctx: "Context"):
-        """Allow a guild to use the bot."""
-        # if not ctx.invoked_subcommand:
-        #     await ctx.send_help(ctx.command)
-
-    @cmd_owner_authorization.command(name="allow")
-    async def cmd_owner_authorization_allow(self, ctx: "Context", guild_id: int):
-        """Allow a guild to use the bot."""
-        await self.bot.services.authorization.allow(guild_id)
-        await ctx.send(_("This guild has been authorized."))
-
-    @cmd_owner_authorization.command(name="disallow")
-    async def cmd_owner_authorization_disallow(self, ctx: "Context", guild_id: int):
-        """Disallow a guild to use the bot."""
-        await self.bot.services.authorization.disallow(guild_id)
-        await ctx.send(_("This guild has been unauthorized."))
-
-    @cmd_owner_authorization.command(name="check")
-    async def cmd_owner_authorization_check(self, ctx: "Context", guild_id: int):
-        """Check if a guild is allowed to use the bot."""
-        is_authorized = await self.bot.services.authorization.is_allowed(guild_id)
-        await ctx.send(
-            _("This guild has been authorized.")
-            if is_authorized
-            else _("This guid has not been authorized.")
-        )
 
     @cmd_owner.command(name="notifychannel")
     async def cmd_owner_setchannel(
@@ -86,9 +64,10 @@ class Owner(commands.Cog):
         await ctx.send(_("The channel has been set to {channel}.").format(channel=channel.mention))
 
     @commands.command(name="load")
-    async def cmd_owner_load(self, ctx: "Context", cog: str):
+    async def cmd_owner_load(self, ctx: "Context", cog: str, *, flag: CogLogicFlags):
         """Load a cog."""
         try:
+            cog = cog if flag.total else f"vindex.cogs.{cog}"
             await self.bot.services.cogs_manager.load(cog)
             await ctx.send(_("{cog} has been loaded.").format(cog=inline(cog)))
         except Exception as exception:
@@ -96,13 +75,17 @@ class Owner(commands.Cog):
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
     @commands.command(name="reload")
-    async def cmd_owner_reload(self, ctx: "Context", cog: str | None = None):
+    async def cmd_owner_reload(
+        self, ctx: "Context", cog: str | None = None, *, flag: CogLogicFlags
+    ):
         """Reload a cog."""
         if not cog:
             if not self.last_loaded_cog:
                 await ctx.send(_("You must specify a cog to reload."))
                 return
             cog = self.last_loaded_cog
+        else:
+            cog = cog if flag.total else f"vindex.cogs.{cog}"
         try:
             await self.bot.services.cogs_manager.reload(cog)
             await ctx.send(_("{cog} has been reloaded.").format(cog=inline(cog)))
@@ -112,9 +95,10 @@ class Owner(commands.Cog):
             await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
 
     @commands.command(name="unload")
-    async def cmd_owner_unload(self, ctx: "Context", cog: str):
+    async def cmd_owner_unload(self, ctx: "Context", cog: str, *, flag: CogLogicFlags):
         """Unload a cog."""
         try:
+            cog = cog if flag.total else f"vindex.cogs.{cog}"
             await self.bot.services.cogs_manager.unload(cog)
             await ctx.send(_("{cog} has been unloaded.").format(cog=inline(cog)))
         except Exception as exception:
@@ -149,7 +133,7 @@ class Owner(commands.Cog):
             view = ConfirmView(
                 ctx, content=_("Are you sure you want to synchronise the whole tree globally?")
             )
-            async with view as confirmed:
+            async with view as (confirmed, __):
                 if confirmed is None:
                     return
                 if confirmed is False:

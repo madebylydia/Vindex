@@ -1,6 +1,8 @@
 import logging
 import typing
 
+from prisma.models import Guild
+
 from vindex.core.i18n import Languages
 from vindex.core.services.proto import Service
 
@@ -26,7 +28,7 @@ class I18nService(Service):
         if actual_locale == locale:
             return
         _log.info("Setting locale for guild %s to %s", guild_id, locale)
-        await self.bot.database.guild.upsert(
+        await Guild.prisma().upsert(
             where={
                 "id": guild_id,
             },
@@ -40,17 +42,19 @@ class I18nService(Service):
     async def get_guild_locale(self, guild_id: int) -> "Languages":
         """Get the locale for a guild."""
         if guild_id in self._cache:
+            _log.debug("Using cached locale for guild %s", guild_id)
             return self._cache[guild_id]
-        guild_data = await self.bot.database.guild.find_unique(
+        guild_data = await Guild.prisma().find_unique(
             where={"id": guild_id},
         )
         locale = Languages.ENGLISH if not guild_data else Languages(guild_data.locale)
+        _log.debug("Cached locale for guild %s: %s", guild_id, locale)
         self._cache[guild_id] = locale
         return locale
 
     async def setup(self) -> None:
         """Setup the i18n service."""
-        guilds = await self.bot.database.guild.find_many()
+        guilds = await Guild.prisma().find_many()
         for guild in guilds:
             self._cache[guild.id] = Languages(guild.locale)
         _log.debug("Done caching all guilds locale.")
