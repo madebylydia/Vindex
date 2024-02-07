@@ -8,6 +8,8 @@ import discord
 import rich
 from discord import app_commands
 from discord.app_commands.errors import AppCommandError
+from discord.app_commands.translator import TranslationContextTypes, locale_str
+from discord.enums import Locale
 from discord.ext import commands
 from discord.interactions import Interaction
 from rich.box import MINIMAL
@@ -57,10 +59,24 @@ def get_intents() -> discord.Intents:
     return intents
 
 
+class VindexTranslator(discord.app_commands.Translator):
+    """Translator for Vindex's command tree."""
+
+    async def translate(
+        self, string: locale_str, locale: Locale, context: TranslationContextTypes
+    ) -> str | None:
+        # TODO: Implement translations here
+        _log.debug(context)
+        return await super().translate(string, locale, context)
+
+
 class VindexTree(app_commands.CommandTree["Vindex"]):
     """Internal command tree for Vindex hybrid/app commands."""
 
-    async def on_error(self, interaction: Interaction["Vindex"], error: AppCommandError) -> None:
+    def __init__(self, client: "Vindex", *, fallback_to_global: bool = True):
+        super().__init__(client, fallback_to_global=fallback_to_global)
+
+    async def on_error(self, interaction: Interaction["Vindex"], error: AppCommandError, /) -> None:
         _log.error("Error inside the app commands tree", exc_info=True)
         return await super().on_error(interaction, error)
 
@@ -280,6 +296,9 @@ class Vindex(commands.AutoShardedBot):
         await self.services.prepare()
         timer_end = discord.utils.utcnow()
         _log.debug("Services took %s to prepare.", timer_end - timer_start)
+
+        # Translator for app commands
+        await self.tree.set_translator(VindexTranslator())
 
         _log.info("Done setting up Vindex.")
         await super().setup_hook()

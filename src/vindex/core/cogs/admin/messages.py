@@ -14,9 +14,7 @@ if typing.TYPE_CHECKING:
 _ = Translator("Admin", __file__)
 
 
-async def blacklist_add(
-    ctx: "Context", blacklist_entry: "Blacklist"
-) -> discord.Embed:
+async def blacklist_add(ctx: "Context", blacklist_entry: "Blacklist") -> discord.Embed:
     embed = discord.Embed(
         title="[Blacklist] Entry added",
         description=_(
@@ -45,14 +43,15 @@ async def blacklist_add(
 
     return embed
 
+
 async def blacklist_remove(
-    ctx: "Context", removed_blacklist_entry: "Blacklist"
+    ctx: "Context", removed_blacklist_entry: "Blacklist", reason: str
 ) -> discord.Embed:
     embed = discord.Embed(
         title="[Blacklist] Entry removed",
-        description=_(
-            "A blacklist entry has been deleted by {author}.\nReason: {reason}"
-        ).format(author=inline(str(ctx.author)), reason=removed_blacklist_entry.reason),
+        description=_("A blacklist entry has been deleted by {author}.\nReason: {reason}").format(
+            author=inline(str(ctx.author)), reason=reason
+        ),
         color=discord.Color.dark_green(),
         timestamp=removed_blacklist_entry.createdAt,
     )
@@ -71,6 +70,7 @@ async def blacklist_remove(
         embed.set_thumbnail(url=user.display_avatar.url)
         if user.banner:
             embed.set_image(url=user.banner.url)
+    embed.add_field(name="Blacklist reason", value=removed_blacklist_entry.reason)
 
     embed.set_footer(text=_("Blacklisted by {author}").format(author=str(ctx.author)))
 

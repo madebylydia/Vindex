@@ -16,20 +16,21 @@ class Tags:
     """
 
     cockpit_lang: str
-    plane: bool = dataclasses.field(default=False)
-    helicopter: bool = dataclasses.field(default=False)
     full_fidelity: bool = dataclasses.field(default=False)
     is_fc3: bool = dataclasses.field(default=False)
 
 
 @dataclasses.dataclass
-class Module:
+class Module:  # pylint: disable=too-many-instance-attributes
     """A class to define a specific module of DCS.
     Contains multiple data about each modules.
     """
 
     name: str
     """The name of the module."""
+
+    kind: typing.Literal["aircraft", "helicopter", "map", "extension", "campaign", "other"]
+    """The kind of module."""
 
     tags: Tags
     """A class containing metadata about the module."""
@@ -66,7 +67,8 @@ class Modules(enum.Enum):
 
     F18 = Module(
         name="F/A-18C Hornet",
-        tags=Tags(cockpit_lang="en", plane=True, full_fidelity=True),
+        kind="aircraft",
+        tags=Tags(cockpit_lang="en", full_fidelity=True),
         origin="official",
         release_date=datetime(2018, 6, 1, 17, 2, tzinfo=timezone.utc),
         status="early_access",

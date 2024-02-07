@@ -12,7 +12,6 @@ import uvloop
 from rich.logging import RichHandler
 
 from vindex import __version__
-from vindex.core.bot import Vindex
 from vindex.settings import read_settings
 
 _log = logging.getLogger(__name__)
@@ -97,6 +96,11 @@ def main():
     settings = read_settings()
 
     async def async_start():
+        # The Vindex class should only be imported here.
+        # This is due to Prisma imports. It will fail if the Prisma client is not
+        # generated first, which can be done with the CLI argument.
+        from vindex.core.bot import Vindex
+
         vindex = Vindex(settings)
         try:
             async with vindex as bot:

@@ -3,12 +3,12 @@ import typing
 import discord
 from discord.ext import commands
 
-from . import messages
-
 from vindex.core.checks import is_bot_mod
 from vindex.core.core_types import Context
 from vindex.core.i18n import Translator
 from vindex.core.ui.formatting import as_str_timedelta, inline
+
+from . import messages
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
@@ -30,6 +30,8 @@ class Admin(commands.Cog):
     @is_bot_mod()
     async def cmd_admin_blacklist(self, ctx: Context):
         """Blacklist management."""
+        if not ctx.subcommand_passed:
+            await ctx.send_help(ctx.command)
 
     @cmd_admin_blacklist.command(name="add")
     async def cmd_blacklist_add(
@@ -57,12 +59,16 @@ class Admin(commands.Cog):
             await ctx.send(_("User is already blacklisted."))
 
     @cmd_admin_blacklist.command(name="remove")
-    async def cmd_blacklist_remove(self, ctx: Context, user_or_id: discord.User | int, *, reason: str):
+    async def cmd_blacklist_remove(
+        self, ctx: Context, user_or_id: discord.User | int, *, reason: str
+    ):
         """Remove a user from the blacklist."""
         user_id = user_or_id.id if isinstance(user_or_id, discord.User) else user_or_id
         result = await self.bot.services.blacklist.remove_from_blacklist(user_id)
         if result:
-            await self.bot.core_notify(embeds=[await messages.blacklist_remove(ctx, result)])
+            await self.bot.core_notify(
+                embeds=[await messages.blacklist_remove(ctx, result, reason)]
+            )
             await ctx.tick()
         else:
             await ctx.send(_("User is not blacklisted."))
@@ -108,7 +114,8 @@ class Admin(commands.Cog):
                 blacklist_delta = discord.utils.utcnow() - result.updatedAt
                 embed.set_footer(
                     text=_("By {user} - Update: {update} ago").format(
-                        user=fetched_author.display_name, update=str(as_str_timedelta(blacklist_delta))
+                        user=fetched_author.display_name,
+                        update=str(as_str_timedelta(blacklist_delta)),
                     ),
                     icon_url=fetched_author.display_avatar.url,
                 )

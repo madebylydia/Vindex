@@ -13,22 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Python & PDM
+        uses: pdm-project/setup-pdm@v4
         with:
-          cache: 'poetry'
+          cache: true
+          cache-dependency-path: |
+            pdm.lock
+            pyproject.toml
           python-version: 3.12
 
       - name: Setup project
         run: |
-          poetry install --with dev
-          poetry run prisma generate
+          pdm install --dev
+          pdm run prisma generate
 
       - name: Generate messages.pot
-        run: poetry run poe translate
+        run: pdm run translate
 
       - name: Upload to Crowdin
         uses: crowdin/github-action@v1

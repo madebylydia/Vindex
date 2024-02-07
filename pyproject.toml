@@ -1,45 +1,51 @@
-[tool.poetry]
+[project]
 name = "vindex"
-version = "0.1.0dev1"
+version = "0.1.0.dev1"
 description = "Vindex is a Discord bot made for DCS communities."
-authors = ["Julien Mauroy <pro.julien.mauroy@gmail.com>"]
-license = "MIT license"
+authors = [
+    {name = "Julien Mauroy", email = "pro.julien.mauroy@gmail.com"},
+]
+requires-python = ">=3.12,<4.0"
 readme = "README.md"
+license = {text = "MIT license"}
+dependencies = [
+    "discord-py<3.0.0,>=2.3.2",
+    "jishaku<3.0.0,>=2.5.2",
+    "prisma<1.0.0,>=0.12.0",
+    "rich<14.0.0,>=13.7.0",
+    "platformdirs<5.0.0,>=4.1.0",
+    "uvloop<1.0.0,>=0.19.0",
+    "babel<3.0.0,>=2.14.0",
+    "polib<2.0.0,>=1.2.0",
+    "python-dotenv<2.0.0,>=1.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-"discord.py" = "^2.3.2"
-jishaku = "^2.5.2"
-prisma = "^0.12.0"
-rich = "^13.7.0"
-platformdirs = "^4.1.0"
-uvloop = "^0.19.0"
-babel = "^2.14.0"
-polib = "^1.2.0"
-python-dotenv = "^1.0.0"
+[tool.pdm]
+distribution = true
 
-[tool.poetry.group.dev.dependencies]
-black = "^23.12.1"
-isort = "^5.13.2"
-ruff = "^0.1.9"
-poethepoet = "^0.24.4"
-pylint = "^3.0.3"
+[tool.pdm.build]
+includes = []
 
-[tool.poe]
-poetry_command = ""
+[tool.pdm.dev-dependencies]
+dev = [
+    "black<24.0.0,>=23.12.1",
+    "isort<6.0.0,>=5.13.2",
+    "ruff<1.0.0,>=0.1.9",
+    "pylint<4.0.0,>=3.0.3",
+]
 
-[tool.poe.tasks]
+[tool.pdm.scripts]
 _black = "black src/"
 _isort = "isort src/"
 _prisma_format = "prisma format"
-dev = "python -m vindex"
-format = ["_black", "_isort", "_prisma_format"]
-lint = "pylint src --rcfile=.pylintrc --output-format=colorized"
-translate.script = "vindex._utils:translate_project"
+dev = {cmd = "python -m vindex --prisma-generate", help = "Run an instance of the bot."}
+format = {composite = ["black", "isort", "_prisma_format"], help = "Format the codebase. (black, isort, prisma)"}
+lint = {cmd = "pylint src --rcfile=.pylintrc --output-format=colorized", help = "Lint the project with Pylinter."}
+translate = {call = "vindex._utils:translate_project", help = "Create the required \".po\" files for localization."}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.black]
 line-length = 99
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

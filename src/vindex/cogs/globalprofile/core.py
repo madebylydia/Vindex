@@ -6,8 +6,9 @@ from discord.ext import commands
 from prisma.models import Profile
 
 from vindex.core.i18n import Translator
-from vindex.core.ui.formatting import (as_str_timedelta, escape, inline,
-                                       reduce_to)
+from vindex.core.ui.formatting import as_str_timedelta
+
+from .components import ProfileEditView
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
@@ -69,45 +70,35 @@ class GlobalProfile(commands.Cog):
             return await ctx.send(_("This user does not have a profile yet!"))
         return await ctx.send(embed=self.build_profile(user, profile))
 
-    @cmd_profile.group("set")
-    async def cmd_profile_set(self, ctx: "Context"):
-        """Set your global profile informations."""
+    @cmd_profile.command("edit")
+    async def cmd_profile_edit(self, ctx: "Context"):
+        """Set your profile basic informations."""
+        profile = await Profile.prisma().find_unique(where={"id": ctx.author.id})
+        if not profile:
+            return await ctx.send(_("You do not have a profile yet!"))
+        view = ProfileEditView(profile)
+        await ctx.send(view=view)
 
-    @cmd_profile_set.command("description")
-    async def cmd_profile_set_description(self, ctx: "Context", *, description: str | None = None):
-        """Set your profile description."""
-        if description is None:
-            profile = await Profile.prisma().find_unique(where={"id": ctx.author.id})
-            if profile is None:
-                return await ctx.send(_("You do not have a profile yet!"))
-            if not profile.description:
-                return await ctx.send(_("You do not have a description yet!"))
-            return await ctx.send(
-                _("Your current description is: {description}").format(
-                    description=inline(escape(reduce_to(profile.description, 1500)))
-                )
-            )
-
-        if len(description) > 2048:
-            return await ctx.send(_("Your description cannot be longer than 2048 characters!"))
-        await Profile.prisma().upsert(
-            where={"id": ctx.author.id},
-            data={
-                "create": {
-                    "user": {
-                        "connect": {"id": ctx.author.id},
-                        "create": {
-                            "id": ctx.author.id,
-                        },
-                    },
-                    "description": description,
-                    "color": str(ctx.author.color),
-                },
-                "update": {"description": description},
-            },
-        )
-        await ctx.send(
-            _("Done! Your description is now: {description}").format(
-                description=inline(escape(description))
-            )
-        )
+        # if len(description) > 2048:
+        #     return await ctx.send(_("Your description cannot be longer than 2048 characters!"))
+        # await Profile.prisma().upsert(
+        #     where={"id": ctx.author.id},
+        #     data={
+        #         "create": {
+        #             "user": {
+        #                 "connect": {"id": ctx.author.id},
+        #                 "create": {
+        #                     "id": ctx.author.id,
+        #                 },
+        #             },
+        #             "description": description,
+        #             "color": str(ctx.author.color),
+        #         },
+        #         "update": {"description": description},
+        #     },
+        # )
+        # await ctx.send(
+        #     _("Done! Your description is now: {description}").format(
+        #         description=inline(escape(description))
+        #     )
+        # )
