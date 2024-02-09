@@ -18,7 +18,6 @@ The bot runs thanks to Prisma and PostgreSQL. You first need to install and setu
 The environment variables that are necessary are:
 
 - `VINDEX_TOKEN` : The token that will be used for the bot to connect.
-- `VINDEX_PREFIX` : The prefix that will be set. Default to pinging the bot if not set.
 - `VINDEX_DB_URL` : The URL to use to connect to the database. See [Prisma documentation directly](https://www.prisma.io/docs/orm/prisma-schema/overview/data-sources).
 
 ## Technologies

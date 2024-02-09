@@ -91,9 +91,9 @@ class Vindex(commands.AutoShardedBot):
 
     bot_mods: list[int]
 
-    def __init__(self, settings: "Settings") -> None:
+    def __init__(self, settings: "Settings", prisma_client: "prisma.Prisma") -> None:
         self.settings = settings
-        self.database = prisma.Prisma(datasource={"url": self.settings.database_url})
+        self.database = prisma_client
         super().__init__(
             commands.when_mentioned,
             tree_cls=VindexTree,
@@ -267,8 +267,6 @@ class Vindex(commands.AutoShardedBot):
 
     async def setup_hook(self) -> None:
         # Database stuff
-        await self.database.connect()
-        prisma.register(self.database)
         _log.info("Connected to database.")
 
         # Ensuring there is a Core row existing
@@ -306,7 +304,7 @@ class Vindex(commands.AutoShardedBot):
     async def get_context(
         self, origin: discord.Message | discord.Interaction, /, *, cls: type = Context
     ) -> Context:
-        return await super().get_context(origin, cls=cls)
+        return await super().get_context(origin, cls=cls)  # pyright: ignore[reportArgumentType]
 
     async def on_command_error(  # pyright: ignore[reportIncompatibleMethodOverride]
         # Weirdest issue I ever had
@@ -347,7 +345,7 @@ class Vindex(commands.AutoShardedBot):
 
         await self.core_notify(
             content=(
-                "An error occured while executing a command. Please check internal log for "
+                ":x: An error occured while executing a command. Please check internal log for "
                 "traceback."
             )
         )

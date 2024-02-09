@@ -27,10 +27,10 @@ class VindexNamespace(argparse.Namespace):
     prisma_migrate: bool
 
 
-def run_command(command: str) -> None:
+def run_command(command: str) -> int:
     """Run a provided command in the current shell by creating a new process."""
     with subprocess.Popen(command, shell=True) as process:
-        process.wait()
+        return process.wait()
 
 
 def parse_arguments() -> VindexNamespace:
@@ -98,21 +98,34 @@ def main():
     async def async_start():
         # The Vindex class should only be imported here.
         # This is due to Prisma imports. It will fail if the Prisma client is not
-        # generated first, which can be done with the CLI argument.
+        # generated first, which is done with the CLI argument.
         from vindex.core.bot import Vindex
+        from prisma import Client, register
 
-        vindex = Vindex(settings)
+        db = Client()
+        try:
+            await db.connect()
+        except Exception as e:
+            _log.error("Failed to connect to database", exc_info=e)
+            raise e
+
+        vindex = Vindex(settings, db)
+        register(db)
+
         try:
             async with vindex as bot:
                 await bot.start(settings.token)
         finally:
             _log.warning("Bot terminated. Disconnecting from database...")
-            await vindex.database.disconnect()
+            await db.disconnect()
+
+    def prisma_cmd(command: str) -> str:
+        return f"{sys.executable} -m prisma {command}"
 
     if arguments.prisma_generate:
-        run_command("prisma generate")
+        run_command(prisma_cmd("generate"))
     if arguments.prisma_migrate:
-        run_command("prisma migrate deploy")
+        run_command(prisma_cmd("migrate deploy"))
 
     try:
         uvloop.run(async_start())
