@@ -93,7 +93,11 @@ def main():
         _log.info("Loading .env environment variables...")
         dotenv.load_dotenv(dotenv.find_dotenv())
 
-    settings = read_settings()
+    try:
+        settings = read_settings()
+    except KeyError as exception:
+        _log.error(f"Missing environment variable: {exception}")
+        sys.exit(1)
 
     async def async_start():
         # The Vindex class should only be imported here.
