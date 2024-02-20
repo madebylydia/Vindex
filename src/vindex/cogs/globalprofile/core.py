@@ -3,10 +3,10 @@ import typing
 import discord
 from discord import app_commands
 from discord.ext import commands
-from prisma.models import Profile
 
+from prisma.models import Profile
 from vindex.core.i18n import Translator
-from vindex.core.ui.formatting import as_str_timedelta
+from vindex.core.utils.formatting import Humanize
 
 from .components import ProfileEditView
 
@@ -41,7 +41,7 @@ class GlobalProfile(commands.Cog):
 
         update_delta = discord.utils.utcnow() - profile.updatedAt
         embed.set_footer(
-            text=_("Last updated {date} ago").format(date=as_str_timedelta(update_delta))
+            text=_("Last updated {date} ago").format(date=Humanize.timedelta(update_delta))
         )
         return embed
 
@@ -51,7 +51,7 @@ class GlobalProfile(commands.Cog):
         if ctx.subcommand_passed:
             return
         if user:
-            profile = await Profile.prisma().find_unique(where={"id": user.id})
+            profile = await Profile.prisma().find_unique(where={"id": str(user.id)})
             if profile is None:
                 return await ctx.send(_("This user does not have a profile yet!"))
             return await ctx.send(embed=self.build_profile(user, profile))
@@ -63,7 +63,7 @@ class GlobalProfile(commands.Cog):
     async def cmd_profile_get(self, ctx: "Context", *, look_user: discord.User | None = None):
         """Show the profile of an user."""
         user = look_user or ctx.author
-        profile = await Profile.prisma().find_unique(where={"id": user.id})
+        profile = await Profile.prisma().find_unique(where={"id": str(user.id)})
         if profile is None:
             if user.id == ctx.author.id:
                 return await ctx.send(_("You do not have a profile yet!"))
@@ -73,7 +73,7 @@ class GlobalProfile(commands.Cog):
     @cmd_profile.command("edit")
     async def cmd_profile_edit(self, ctx: "Context"):
         """Set your profile basic informations."""
-        profile = await Profile.prisma().find_unique(where={"id": ctx.author.id})
+        profile = await Profile.prisma().find_unique(where={"id": str(ctx.author.id)})
         if not profile:
             return await ctx.send(_("You do not have a profile yet!"))
         view = ProfileEditView(profile)

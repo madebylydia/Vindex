@@ -11,69 +11,92 @@ datasource db {
   relationMode = "foreignKeys"
 }
 
+// Only one column will exist.
 model Core {
   id                   Int     @id @unique @default(1)
   notifyChannel        BigInt?
   invitePermissionCode BigInt?
 }
 
-model ExternalCog {
-  /// The path will be the module's path using dot notation
-  path   String  @id @unique
-  loaded Boolean
+model LoadedCog {
+  id   Int    @id @unique @default(autoincrement())
+  name String @unique
 }
 
-model User {
-  id        BigInt   @id @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile Profile?
-
-  // Attributes used by bot mods.
-  isBotMod         Boolean     @default(false)
-  createdBlacklist Blacklist[] @relation("blacklistedBy")
-  allowedGuilds    Guild[]     @relation("allowedBy")
-}
-
+// Following models are used by "GlobalProfile"
 model Profile {
-  id        BigInt   @id @unique
-  user      User     @relation(fields: [id], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id   String @id @unique
+  user User?  @relation(fields: [id], references: [id])
 
   color       String?
   description String?        @db.Char(4096)
   fields      ProfileField[]
   modules     String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProfileField {
-  id        BigInt  @id @unique
-  profile   Profile @relation(fields: [profileId], references: [id])
-  profileId BigInt
+  id        Int     @id @unique
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String
 
   name  String
   value String
 }
 
+// Following models are used by the bot's core.
+
+// Blacklist is used to blacklist individual users from interacting with the bot.
 model Blacklist {
-  id              BigInt   @id @unique
-  reason          String
-  blacklistedBy   User     @relation("blacklistedBy", fields: [blacklistedById], references: [id])
-  blacklistedById BigInt
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  /// WARN! Generated ID. The Discord ID is stored in `blacklistedId`.
+  id            Int      @id @unique @default(autoincrement())
+  blacklistedId String   @unique
+  createdAt     DateTime @default(now())
+  createdBy     User?    @relation(fields: [createdById], references: [id], onDelete: NoAction)
+  createdById   String
+  reason        String
+  updatedAt     DateTime @updatedAt
+}
+
+// Guilds-related models.
+
+model User {
+  id        String   @id @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations. Not in actual table.
+  profile          Profile?
+  botMod           BotMod?
+  blacklistedUsers Blacklist[]
+  allowedGuilds    GuildAllowance[]
+}
+
+model BotMod {
+  id    Int     @id @unique @default(autoincrement())
+  dId   String  @unique
+  power Boolean @default(true)
+  user  User?   @relation(fields: [dId], references: [id], onDelete: Cascade)
 }
 
 model Guild {
-  id              BigInt    @id @unique
-  allowed         Boolean?
-  allowanceBy     User?     @relation("allowedBy", fields: [allowanceById], references: [id])
-  allowanceById   BigInt?
-  allowanceAt     DateTime?
-  allowanceReason String?
-  locale          String    @default("en")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id     String @id @unique
+  locale String @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// GuildAllowance(s) are used by the "Falx" cog.
+// They allow or not for usage of the bot inside a guild.
+model GuildAllowance {
+  id              String   @id @unique
+  allowed         Boolean  @default(false)
+  allowanceReason String   @db.Char(1000)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       User?    @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdById     String
 }

@@ -40,5 +40,5 @@ jobs:
           download_translations: false
 
         env:
-          CROWDIN_PROJECT_ID: ${{ vars.CROWDIN_PROJECT_ID }}
-          CROWDIN_API_TOKEN: ${{ secrets.CROWDIN_API_KEY }}
+          CROWDIN_VINDEX_PROJECT_ID: ${{ vars.CROWDIN_PROJECT_ID }}
+          CROWDIN_VINDEX_API_TOKEN: ${{ secrets.CROWDIN_API_KEY }}

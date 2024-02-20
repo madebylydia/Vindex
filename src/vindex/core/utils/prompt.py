@@ -23,7 +23,7 @@ class ConfirmView(discord.ui.View):
         ctx: Context,
         *,
         timeout: float = 60.0,
-        **message_parameters: typing.Unpack[SendMethodDict]
+        **message_parameters: typing.Unpack[SendMethodDict],
     ):
         super().__init__(timeout=timeout)
         self.value = None
@@ -37,7 +37,7 @@ class ConfirmView(discord.ui.View):
     async def __aenter__(self) -> tuple[bool | None, discord.Message]:
         self.message = await self.ctx.send(
             **self.message_parameters, view=self
-        )  # pyright: ignore[reportGeneralTypeIssues]
+        )  # pyright: ignore[reportCallIssue]
         assert isinstance(self.message, discord.Message)  # type: ignore
         await self.wait()
         await self.disable()

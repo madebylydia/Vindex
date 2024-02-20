@@ -3,12 +3,15 @@ import typing
 
 import discord
 from discord.interactions import Interaction
+
 from prisma.models import Profile
 
 _log = logging.getLogger(__name__)
 
 
 class ProfileBasicButton(discord.ui.Button["BasicComponent"]):
+    """Basic button to edit a profile."""
+
     profile: "Profile"
 
     def __init__(self, profile: "Profile"):

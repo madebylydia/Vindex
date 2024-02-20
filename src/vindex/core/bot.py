@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import pkgutil
+import re
 import typing
 from contextlib import suppress
 
@@ -76,7 +77,9 @@ class VindexTree(app_commands.CommandTree["Vindex"]):
     def __init__(self, client: "Vindex", *, fallback_to_global: bool = True):
         super().__init__(client, fallback_to_global=fallback_to_global)
 
-    async def on_error(self, interaction: Interaction["Vindex"], error: AppCommandError, /) -> None:
+    async def on_error(
+        self, interaction: Interaction["Vindex"], error: AppCommandError, /
+    ) -> None:
         _log.error("Error inside the app commands tree", exc_info=True)
         return await super().on_error(interaction, error)
 
@@ -87,11 +90,24 @@ class Vindex(commands.AutoShardedBot):
     This class is the main bot class, the "core" itself;
     """
 
+    _shutdown: int
+
     uptime: "datetime"
 
     bot_mods: list[int]
 
     def __init__(self, settings: "Settings", prisma_client: "prisma.Prisma") -> None:
+        """Parameters
+        ----------
+        settings: Settings
+            The core settings for the bot.
+        prisma_client: prisma.Prisma
+            The Prisma client to use for the bot.
+            The client MUST be connected.
+        """
+        if not prisma_client.is_connected():
+            raise ValueError("The Prisma client must be connected before creating the bot.")
+
         self.settings = settings
         self.database = prisma_client
         super().__init__(
@@ -105,9 +121,14 @@ class Vindex(commands.AutoShardedBot):
             ),
         )
         self.services = ServiceProvider(self)
+        self._shutdown = 0
 
         self.add_check(self.check_is_blacklisted)
         self.add_check(self.check_is_chunked_or_chunk)
+
+    async def goodbye(self) -> None:
+        """Shutdown the bot."""
+        await self.close()
 
     @property
     def owner_name(self) -> str | None:
@@ -125,7 +146,7 @@ class Vindex(commands.AutoShardedBot):
             return self.application.team.name
         return self.application.owner.name
 
-    async def add_bot_mod(self, user: discord.abc.User, /) -> None:
+    async def add_bot_mod(self, user: discord.abc.User, /) -> prisma.models.BotMod:
         """Add a bot moderator.
 
         Parameters
@@ -133,25 +154,26 @@ class Vindex(commands.AutoShardedBot):
         user: discord.abc.User
             The user to add.
         """
-        await self.database.user.upsert(
-            where={"id": user.id},
-            data={"create": {"id": user.id, "isBotMod": True}, "update": {"isBotMod": True}},
-        )
+        record = await self.database.botmod.create({"dId": str(user.id)})
         self.bot_mods.append(user.id)
+        return record
 
-    async def remove_bot_mod(self, user: discord.abc.User, /) -> None:
+    async def remove_bot_mod(self, user: discord.abc.User, /) -> prisma.models.BotMod | None:
         """Remove a bot moderator.
 
         Parameters
         ----------
         user: discord.abc.User
             The user to remove.
+
+        Raises
+        ------
+        ValueError
+            If the user is not a bot moderator.
         """
-        await self.database.user.upsert(
-            where={"id": user.id},
-            data={"create": {"id": user.id, "isBotMod": False}, "update": {"isBotMod": False}},
-        )
+        record = await self.database.botmod.delete(where={"dId": str(user.id)})
         self.bot_mods.remove(user.id)
+        return record
 
     async def is_bot_mod(self, user: discord.abc.User, /) -> bool:
         """Check if a user is a bot moderator.
@@ -167,6 +189,21 @@ class Vindex(commands.AutoShardedBot):
             Whether the user is a bot moderator or not.
         """
         return await self.is_owner(user) or user.id in self.bot_mods
+
+    def is_bot_mod_id(self, user_id: int, /) -> bool:
+        """Check if a user is a bot moderator.
+
+        Parameters
+        ----------
+        user_id: int
+            The user ID to check.
+
+        Returns
+        -------
+        bool
+            Whether the user is a bot moderator or not.
+        """
+        return (self.owner_id == user_id) or (user_id in self.bot_mods)
 
     async def core_notify(self, **kwargs: typing.Unpack[SendMethodDict]) -> discord.Message | None:
         """Send a message to the core notification channel.
@@ -275,7 +312,10 @@ class Vindex(commands.AutoShardedBot):
         except prisma.errors.RecordNotFoundError:
             await self.database.core.create({"id": 1})
         self.bot_mods = [
-            user.id for user in await self.database.user.find_many(where={"isBotMod": True})
+            int(botmod.dId)
+            for botmod in await self.database.botmod.find_many(
+                where={"power": True}, include={"user": True}
+            )
         ]
 
         # Core cogs (Most-load cogs)
@@ -328,9 +368,7 @@ class Vindex(commands.AutoShardedBot):
         if isinstance(exception, commands.errors.CommandNotFound):
             await context.send(_("Could not find such command."))
             return
-        if isinstance(
-            exception, (commands.errors.MissingRequiredArgument, commands.errors.TooManyArguments)
-        ):
+        if isinstance(exception, commands.errors.UserInputError):
             await context.send_help(context.command)
             return
 
@@ -338,8 +376,8 @@ class Vindex(commands.AutoShardedBot):
             with suppress(discord.errors.HTTPException):
                 await context.send(
                     _(
-                        "An internal error occured. This look like an unhandled error. Feel free to try "
-                        "again. If this error keep occuring, please contact the bot owner."
+                        "An internal error occured. This look like an unhandled error. Feel free "
+                        "to try again. If this error keep occuring, please contact the bot owner."
                     )
                 )
 
@@ -372,10 +410,25 @@ class Vindex(commands.AutoShardedBot):
         )
 
         settings_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)
-        settings_table.add_row(_("Prefix"), f"[red]<@{self.user.id}>")
+        # settings_table.add_row(_("Prefix"), f"[red]<@{self.user.id}>")
         settings_table.add_row(_("Vindex version"), f"[red]{vindex_version}")
         settings_table.add_row(_("Discord.py version"), f"[red]{discord.__version__}")
+        settings_table.add_row(_("Prisma version"), f"[red]{prisma.__version__}")
         settings_panel = Panel(settings_table, expand=False, title="Settings")
+
+        db_url = self.settings.database_url
+        match = re.match(
+            r"(?P<proto>postgres(?:ql)?):\/\/(?:(?P<auth>[^@\s]+)@)?(?P<host>[^\/\s]+)"
+            r"(?:\/(?P<db>\w+))?(?:\?(?P<params>.+))?",
+            db_url,
+        )
+        assert match
+        groups = match.groupdict()
+
+        db_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)
+        db_table.add_row(_("Host"), f"[red]{groups['host']}")
+        db_table.add_row(_("Database"), f"[red]{groups['db']}")
+        db_panel = Panel(db_table, expand=False, title="Database")
 
         stats_table = Table(show_footer=False, show_edge=False, show_header=False, box=MINIMAL)
         stats_table.add_row(_("Guilds"), f"[red]{len(self.guilds)}")
@@ -383,12 +436,16 @@ class Vindex(commands.AutoShardedBot):
         stats_table.add_row(_("Shards"), f"[red]{self.shard_count}")
         stats_panel = Panel(stats_table, expand=False, title="Stats")
 
-        console.print(Columns((settings_panel, stats_panel)))
+        console.print(Columns((settings_panel, db_panel, stats_panel)))
 
         await self.change_presence(
             status=discord.Status.online,
             activity=discord.CustomActivity(_("Flying the F-14B Tomcat")),
         )
+
+    async def on_message(self, message: discord.Message, /) -> None:
+        await set_language_from_guild(self, message.guild.id if message.guild else None)
+        return await super().on_message(message)
 
     # A few global checks
 
@@ -403,7 +460,3 @@ class Vindex(commands.AutoShardedBot):
         if not ctx.guild.chunked:
             await ctx.guild.chunk()
         return True
-
-    async def on_message(self, message: discord.Message, /) -> None:
-        await set_language_from_guild(self, message.guild.id if message.guild else None)
-        return await super().on_message(message)

@@ -1,12 +1,13 @@
-import textwrap
 import typing
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from babel.dates import format_datetime as _format_datetime
 from babel.dates import format_timedelta as _format_timedelta
 from babel.lists import format_list as _format_list
 from babel.numbers import format_number as _format_number
 from discord.utils import escape_markdown as _escape_markdown
 from discord.utils import escape_mentions as _escape_mentions
+from discord.utils import utcnow as _utcnow
 
 from vindex.core.i18n import get_babel_current_language
 
@@ -258,23 +259,7 @@ def reduce_to(text: str, max_length: int, *, placeholder: str = "...") -> str:
     str
         The reduced text.
     """
-    return textwrap.shorten(text, width=max_length, placeholder=placeholder)
-
-
-def as_str_timedelta(delta: timedelta) -> str:
-    """Format a timedelta into a human-readable string.
-
-    Parameters
-    ----------
-    delta : timedelta
-        The timedelta to format.
-
-    Returns
-    -------
-    str
-        The formatted timedelta.
-    """
-    return _format_timedelta(delta, locale=get_babel_current_language())
+    return text[: max_length - len(placeholder)] + placeholder if len(text) > max_length else text
 
 
 class Humanize:
@@ -299,7 +284,8 @@ class Humanize:
             The list of items to humanize.
         style : str
             The style to use for the humanization.
-            Defaults to ``"standard"``
+            Defaults to ``"standard"``.
+            See https://babel.pocoo.org/en/latest/api/lists.html
 
         Returns
         -------
@@ -323,3 +309,75 @@ class Humanize:
             The humanized number.
         """
         return _format_number(number, locale=get_babel_current_language())
+
+    @staticmethod
+    def date(
+        date: "datetime", date_format: typing.Literal["full", "long", "medium", "short"] = "medium"
+    ) -> str:
+        """Humanize a date.
+
+        Parameters
+        ----------
+        date : datetime | date
+            The date to humanize.
+        date_format : str
+            Defaults to ``"medium"``.
+            See https://babel.pocoo.org/en/latest/api/dates.html
+
+        Returns
+        -------
+        str
+            The humanized date.
+        """
+        return _format_datetime(date, locale=get_babel_current_language(), format=date_format)
+
+    @staticmethod
+    @typing.overload
+    def timedelta(delta: "timedelta") -> str:
+        """Humanize a timedelta.
+
+        Parameters
+        ----------
+        delta : timedelta
+            The timedelta to humanize.
+
+        Returns
+        -------
+        str
+            The humanized timedelta.
+        """
+
+    @staticmethod
+    @typing.overload
+    def timedelta(delta: "datetime") -> str:
+        """Humanize a datetime, and return it as a timedelta from now.
+
+        Parameters
+        ----------
+        delta : datetime
+            The datetime-as-timedelta to humanize.
+
+        Returns
+        -------
+        str
+            The humanized timedelta.
+        """
+
+    @staticmethod
+    def timedelta(delta: "timedelta | datetime") -> str:
+        """Humanize a timedelta.
+
+        Parameters
+        ----------
+        delta : timedelta or datetime
+            The timedelta to humanize.
+            In the case you pass a datetime, it will be converted to a timedelta from now.
+
+        Returns
+        -------
+        str
+            The humanized timedelta.
+        """
+        if isinstance(delta, datetime):
+            delta = _utcnow() - delta
+        return _format_timedelta(delta, locale=get_babel_current_language())

@@ -1,8 +1,8 @@
 import typing
 
 import discord
-from prisma.models import Blacklist
 
+from prisma.models import Blacklist
 from vindex.core.services.proto import Service
 
 if typing.TYPE_CHECKING:
@@ -42,9 +42,9 @@ class BlacklistService(Service):
 
         case = await Blacklist.prisma().create(
             data={
-                "id": user_id,
+                "blacklistedId": str(user_id),
                 "reason": reason,
-                "blacklistedById": author.id,
+                "createdById": str(author.id),
             }
         )
         self.blacklisted_ids.append(user_id)
@@ -67,18 +67,22 @@ class BlacklistService(Service):
         if not self.is_blacklisted(user_id):
             return None
 
-        case = await Blacklist.prisma().delete(where={"id": user_id})
+        case = await Blacklist.prisma().delete(where={"blacklistedId": str(user_id)})
         self.blacklisted_ids.remove(user_id)
 
         return case
 
-    async def get_blacklist(self, user_id: int) -> Blacklist | None:
+    async def get_blacklist(
+        self, user_id: int, *, include_blacklist_author: bool = True
+    ) -> Blacklist | None:
         """Get the blacklist entry for an user.
 
         Parameters
         ----------
         user_id : int
             The id of the user to get the blacklist entry for.
+        include_blacklist_author : bool
+            Whether to include the author of the blacklist entry. ("createdBy" field)
 
         Returns
         -------
@@ -86,7 +90,7 @@ class BlacklistService(Service):
             The blacklist entry for the user.
         """
         return await Blacklist.prisma().find_unique(
-            where={"id": user_id}, include={"blacklistedBy": True}
+            where={"blacklistedId": str(user_id)}, include={"createdBy": include_blacklist_author}
         )
 
     def is_blacklisted(self, user_id: int, /) -> bool:
@@ -106,4 +110,6 @@ class BlacklistService(Service):
 
     async def setup(self) -> None:
         """Prepare the service."""
-        self.blacklisted_ids = [case.id for case in await Blacklist.prisma().find_many()]
+        self.blacklisted_ids = [
+            int(case.blacklistedId) for case in await Blacklist.prisma().find_many()
+        ]

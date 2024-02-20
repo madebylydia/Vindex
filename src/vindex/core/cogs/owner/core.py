@@ -4,8 +4,10 @@ import discord
 from discord.ext import commands
 
 from vindex.core.i18n import Translator
-from vindex.core.ui.formatting import block, inline
-from vindex.core.ui.prompt import ConfirmView
+from vindex.core.utils.formatting import inline
+from vindex.core.utils.prompt import ConfirmView
+
+from .messages import LoadUnloadReloadEmbed
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
@@ -26,11 +28,8 @@ class Owner(commands.Cog):
     Used for bot's administration & management.
     """
 
-    last_loaded_cog: str | None = None
-
     def __init__(self, bot: "Vindex") -> None:
         self.bot = bot
-        self.last_loaded_cog = None
         super().__init__()
 
     @commands.is_owner()
@@ -39,8 +38,8 @@ class Owner(commands.Cog):
         """Commands reserved for the owner.
         Used for bot's administration & management.
         """
-        # if not ctx.invoked_subcommand:
-        #     await ctx.send_help(ctx.command)
+        if not ctx.invoked_subcommand:
+            await ctx.send_help(ctx.command)
 
     @cmd_owner.command(name="notifychannel")
     async def cmd_owner_setchannel(
@@ -62,69 +61,6 @@ class Owner(commands.Cog):
 
         await ctx.db.core.update(where={"id": 1}, data={"notifyChannel": channel.id})
         await ctx.send(_("The channel has been set to {channel}.").format(channel=channel.mention))
-
-    @commands.command(name="load")
-    async def cmd_owner_load(self, ctx: "Context", cog: str, *, flag: CogLogicFlags):
-        """Load a cog."""
-        try:
-            cog = cog if flag.total else f"vindex.cogs.{cog}"
-            await self.bot.services.cogs_manager.load(cog)
-            await ctx.send(_("{cog} has been loaded.").format(cog=inline(cog)))
-        except Exception as exception:
-            exception_block = block(str(exception), "py")
-            await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
-
-    @commands.command(name="reload")
-    async def cmd_owner_reload(
-        self, ctx: "Context", cog: str | None = None, *, flag: CogLogicFlags
-    ):
-        """Reload a cog."""
-        if not cog:
-            if not self.last_loaded_cog:
-                await ctx.send(_("You must specify a cog to reload."))
-                return
-            cog = self.last_loaded_cog
-        else:
-            cog = cog if flag.total else f"vindex.cogs.{cog}"
-        try:
-            await self.bot.services.cogs_manager.reload(cog)
-            await ctx.send(_("{cog} has been reloaded.").format(cog=inline(cog)))
-            self.last_loaded_cog = cog
-        except Exception as exception:
-            exception_block = block(str(exception), "py")
-            await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
-
-    @commands.command(name="unload")
-    async def cmd_owner_unload(self, ctx: "Context", cog: str, *, flag: CogLogicFlags):
-        """Unload a cog."""
-        try:
-            cog = cog if flag.total else f"vindex.cogs.{cog}"
-            await self.bot.services.cogs_manager.unload(cog)
-            await ctx.send(_("{cog} has been unloaded.").format(cog=inline(cog)))
-        except Exception as exception:
-            exception_block = block(str(exception), "py")
-            await ctx.send(_("An error occured:\n{error}").format(error=exception_block))
-
-    @commands.command(name="cogs")
-    async def cmd_owner_cogs(self, ctx: "Context"):
-        """List loaded cogs."""
-        cogs = self.bot.extensions
-
-        embed = discord.Embed(
-            title=_("Loaded Cogs ({count})").format(count=len(cogs)), color=ctx.color
-        )
-        embed.description = ", ".join([inline(cog) for cog in cogs])
-
-        await ctx.send(embed=embed)
-
-        async with ctx.typing():
-            unloaded = await ctx.db.externalcog.find_many(where={"loaded": False})
-            embed = discord.Embed(
-                title=_("Known unloaded cogs ({count})").format(count=len(unloaded)),
-                color=ctx.color,
-            )
-            embed.description = ", ".join([inline(cog.path) for cog in unloaded])
-            await ctx.send(embed=embed)
 
     @cmd_owner.command(name="sync")
     async def cmd_owner_sync(self, ctx: "Context", guild: discord.Guild | None = None):
@@ -148,3 +84,77 @@ class Owner(commands.Cog):
                 guild=inline(guild.name)
             )
         )
+
+    @commands.command(name="cogs")
+    async def cmd_cogs(self, ctx: "Context"):
+        """List loaded cogs."""
+        cogs = self.bot.extensions
+
+        embed = discord.Embed(
+            title=_("Loaded Cogs ({count})").format(count=len(cogs)), color=ctx.color
+        )
+        embed.description = ", ".join([inline(cog) for cog in cogs])
+
+        await ctx.send(embed=embed)
+
+        async with ctx.typing():
+            unloaded = self.bot.services.cogs_manager.available_modules()
+            embed = discord.Embed(
+                title=_("Known unloaded cogs ({count})").format(count=len(unloaded)),
+                color=ctx.color,
+            )
+            embed.description = ", ".join([inline(cog) for cog in unloaded])
+            await ctx.send(embed=embed)
+
+    @commands.command(name="load")
+    async def cmd_load(self, ctx: "Context", *cogs: str, flag: CogLogicFlags):
+        """Load a cog.
+
+        By default, the command will add `vindex.cogs.` to the cog name.
+        If you wish to rather use an absolute name rather than relative, you can use the `--total`
+        flag by passing `True`.
+
+        Parameters
+        ----------
+        cogs : str
+            The cogs to load.
+        flag : CogLogicFlags
+            `--total` : bool
+                If the cog name is absolute or relative.
+        """
+        if not cogs:
+            await ctx.send_help(ctx.command)
+            return
+        cogs = tuple(cog if flag.total else f"vindex.cogs.{cog}" for cog in cogs)
+        result = await self.bot.services.cogs_manager.load(cogs)
+        await ctx.send(embed=LoadUnloadReloadEmbed(data=result))
+
+    @commands.command(name="reload")
+    async def cmd_reload(self, ctx: "Context", *cogs: str, flag: CogLogicFlags):
+        """Reload a cog.
+
+        By default, the command will add `vindex.cogs.` to the cog name.
+        If you wish to rather use an absolute name rather than relative, you can use the `--total`
+        flag by passing `True`.
+        """
+        cogs = tuple(cog if flag.total else f"vindex.cogs.{cog}" for cog in cogs)
+        result = await self.bot.services.cogs_manager.reload(cogs)
+        await ctx.send(embed=LoadUnloadReloadEmbed(data=result))
+
+    @commands.command(name="unload")
+    async def cmd_unload(self, ctx: "Context", *cogs: str, flag: CogLogicFlags):
+        """Unload a cog.
+
+        By default, the command will add `vindex.cogs.` to the cog name.
+        If you wish to rather use an absolute name rather than relative, you can use the `--total`
+        flag by passing `True`.
+        """
+        cogs = tuple(cog if flag.total else f"vindex.cogs.{cog}" for cog in cogs)
+        result = await self.bot.services.cogs_manager.unload(cogs)
+        await ctx.send(embed=LoadUnloadReloadEmbed(data=result))
+
+    @commands.command(name="shutdown")
+    async def cmd_shutdown(self, ctx: "Context"):
+        """Shutdown the bot."""
+        await ctx.send(_("Shutting down..."))
+        await self.bot.goodbye()

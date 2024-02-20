@@ -5,12 +5,12 @@ from discord import app_commands
 from discord.ext import commands
 
 from vindex import __version__
-from vindex.core.core_types import Context, GuildContext
 from vindex.core.i18n import Languages, Translator
-from vindex.core.ui.formatting import inline
+from vindex.core.utils.formatting import inline
 
 if typing.TYPE_CHECKING:
     from vindex.core.bot import Vindex
+    from vindex.core.core_types import Context, GuildContext
 
 _ = Translator("ServerSettings", __file__)
 
@@ -27,7 +27,7 @@ class Core(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     @commands.hybrid_group("set")
-    async def cmd_set(self, ctx: GuildContext):
+    async def cmd_set(self, ctx: "GuildContext"):
         """Set server settings."""
 
     @cmd_set.command(
@@ -38,7 +38,7 @@ class Core(commands.Cog):
         ),
     )
     @app_commands.describe(locale="Language to use for the server.")
-    async def cmd_set_locale(self, ctx: GuildContext, locale: Languages | None = None):
+    async def cmd_set_locale(self, ctx: "GuildContext", locale: Languages | None = None):
         """Get or set the locale for the server.
 
         Availables languages are:
@@ -60,7 +60,7 @@ class Core(commands.Cog):
         await ctx.send(_("Locale set to {locale}.").format(locale=inline(locale.value)))
 
     @commands.hybrid_command("invite")
-    async def cmd_invite(self, ctx: Context):
+    async def cmd_invite(self, ctx: "Context"):
         """Return an invitation code where to invite the bot."""
         assert self.bot.user
         invite_permissions_code = (
@@ -82,7 +82,7 @@ class Core(commands.Cog):
         )
 
     @commands.hybrid_command("about")
-    async def cmd_about(self, ctx: Context):
+    async def cmd_about(self, ctx: "Context"):
         """Return information about the bot."""
         assert self.bot.user
         embed = discord.Embed(

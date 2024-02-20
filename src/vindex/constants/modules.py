@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 
 
 class Developers(enum.Enum):
+    """A list of developers that are known to develop modules for DCS."""
+
     EAGLE_DYNAMICS = "Eagle Dynamics SA"
 
 

@@ -1,0 +1,81 @@
+version: '3.8'
+
+
+x-env: &pg-env
+  POSTGRES_USER: ${POSTGRES_USER:-vindex}
+  POSTGRES_DB: ${POSTGRES_DB:-Vindex}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?You must set the POSTGRES_PASSWORD environment variable}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+
+services:
+
+  bot:
+    restart: on-failure:5
+    image: vindex
+    build: .
+    depends_on:
+      - db
+
+    environment:
+      # For connection to the database
+      <<: *pg-env
+      VINDEX_DB_URL:
+
+      # General variables
+      VINDEX_TOKEN:
+      VINDEX_LOG_LEVEL:
+
+      # Related to Prisma ORM generation
+      VINDEX_PRISMA_GENERATE:
+      VINDEX_PRISMA_PUSH:
+      VINDEX_PRISMA_MIGRATE:
+
+    networks:
+      - internal
+      - outgoing  # Must access Discord, eh?
+
+    tty: true
+
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
+          target: /app/
+
+  db:
+    image: postgres:16.2
+    restart: always
+
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+
+    environment:
+      <<: *pg-env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?You must set the POSTGRES_PASSWORD environment variable}
+
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    environment:
+      - ADMINER_DESIGN=pepa-linha
+    ports:
+      - 666:8080  # This is because something BAD is gonna happen here. :) and I'll regret this very very much
+    networks:
+      - internal
+      - outgoing
+
+volumes:
+  db:
+    name: vindex_${DB_VOLUME_STUB:-db}
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  outgoing:
+    driver: bridge

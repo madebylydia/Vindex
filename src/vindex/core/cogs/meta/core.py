@@ -8,7 +8,9 @@ if typing.TYPE_CHECKING:
 
 
 class HelpMenu:
-    pass
+    """A future, soon-to-come, new help menu.
+    Pray. Please. I'm seriously doubting when that's gonna come.
+    """
 
 
 class Meta(commands.Cog):
