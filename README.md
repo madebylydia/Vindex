@@ -4,6 +4,17 @@
 
 Vindex is a Discord bot written using discord.py, made for DCS communities.
 
+# Project archived
+
+This project has been archived.
+
+The reason behind this incomplete project is that I am no longer passionate about Python. It has been enough struggle to me in the past months, or even years, for me to keep using this language.
+I believe it is going in the right direction, but it is not mature enough. As such, I'm looking forward to learn something more complete and interesting, such as C Sharp.
+
+Also, I've cut contact with those who were potentially interested in the project, and that I also need a big break from coding, I do not want to do a burn out, and will stop when I feel like I need to.
+
+Your understanding is appreciated.
+
 ## Install
 
 Install the bot by cloning the repository, and using `pip install .` or `pdm install`.
